@@ -71,7 +71,7 @@ export default function SwapCard({
           aria-label="Switch tokens"
           disabled={switching || loading}
           onClick={swapTokens}
-          className={`p-2 rounded-full bg-glass border border-border text-neon transition \${
+          className={`p-2 rounded-full bg-glass border border-border text-neon transition ${
             (switching || loading) && 'opacity-40 pointer-events-none'
           }`}
         >
@@ -120,7 +120,7 @@ export default function SwapCard({
 
       <div className="flex items-center justify-between text-xs text-gray-400 mb-1">
         <span>Network Fee</span>
-        <span>~ \${networkFeeUSD.toFixed(2)} USD</span>
+        <span>~ ${networkFeeUSD.toFixed(2)} USD</span>
       </div>
 
       {error && (
@@ -136,7 +136,7 @@ export default function SwapCard({
       )}
 
       <button
-        className={`mt-4 w-full py-3 rounded-xl text-lg font-bold bg-neon transition text-white shadow-xl \${
+        className={`mt-4 w-full py-3 rounded-xl text-lg font-bold bg-neon transition text-white shadow-xl ${
           !canSwap || loading ? 'opacity-40 cursor-not-allowed' : 'hover:bg-pink-700'
         }`}
         disabled={!canSwap || loading}

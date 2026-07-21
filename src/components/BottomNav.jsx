@@ -17,7 +17,7 @@ export default function BottomNav() {
         <button
           key={item.text}
           onClick={() => setActive(item.text)}
-          className={`flex-1 py-3 flex flex-col items-center font-medium transition \${
+          className={`flex-1 py-3 flex flex-col items-center font-medium transition ${
             active === item.text ? 'text-neon' : 'text-gray-400'
           }`}
           aria-current={active === item.text ? 'page' : undefined}
