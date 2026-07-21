@@ -1,16 +1,7 @@
-import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { useAccount } from 'wagmi';
 
-export default function Header() {
+export default function Header({ onOpenWallet }) {
   const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
-  const { disconnect } = useDisconnect();
-
-  const handleConnect = () => {
-    const injectedConnector = connectors.find((c) => c.id === 'injected');
-    if (injectedConnector) {
-      connect({ connector: injectedConnector });
-    }
-  };
 
   const shortAddr = address
     ? `${address.slice(0, 6)}…${address.slice(-4)}`
@@ -28,19 +19,18 @@ export default function Header() {
       {isConnected ? (
         <button
           className="py-2 px-5 rounded-xl font-semibold text-sm bg-black/20 border border-neon text-neon transition hover:bg-neon/10"
-          onClick={() => disconnect()}
-          aria-label="Disconnect Wallet"
+          onClick={onOpenWallet}
+          aria-label="Wallet"
         >
           {shortAddr}
         </button>
       ) : (
         <button
-          className="py-2 px-5 rounded-xl font-semibold text-sm bg-neon text-white transition hover:bg-pink-700 disabled:opacity-50"
-          onClick={handleConnect}
-          disabled={isPending}
+          className="py-2 px-5 rounded-xl font-semibold text-sm bg-neon text-white transition hover:bg-pink-700"
+          onClick={onOpenWallet}
           aria-label="Connect Wallet"
         >
-          {isPending ? 'Connecting…' : 'Connect'}
+          Connect
         </button>
       )}
     </header>

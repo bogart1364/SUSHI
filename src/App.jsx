@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useSwapState } from './hooks/useSwapState';
 import SwapCard from './components/SwapCard';
 import TokenSelectorSheet from './components/TokenSelectorSheet';
+import WalletSheet from './components/WalletSheet';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
@@ -21,6 +22,7 @@ function App() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');
+  const [walletOpen, setWalletOpen] = useState(false);
 
   const active = useUIStore((s) => s.activeTab);
 
@@ -39,7 +41,7 @@ function App() {
       className="bg-primary min-h-screen font-apple flex flex-col items-center bg-radial-glow"
       style={{ paddingBottom: '80px' }}
     >
-      <Header />
+      <Header onOpenWallet={() => setWalletOpen(true)} />
 
       <main className="flex-1 w-full flex flex-col justify-center px-3 gap-7 max-w-md mx-auto pb-6">
         {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={handleOpenSheet} />}
@@ -47,6 +49,7 @@ function App() {
       </main>
 
       <TokenSelectorSheet open={sheetOpen} onSelect={handleSelectToken} onClose={() => setSheetOpen(false)} />
+      <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
 
       <BottomNav />
       <Toast />
