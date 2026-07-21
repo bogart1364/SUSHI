@@ -1,34 +1,48 @@
-import { useState } from 'react';
+import { useAccount, useConnect, useDisconnect } from 'wagmi';
 
-export default function Header({ onConnect, connected, address }) {
-  const [busy, setBusy] = useState(false);
+export default function Header() {
+  const { address, isConnected } = useAccount();
+  const { connect, connectors, isPending } = useConnect();
+  const { disconnect } = useDisconnect();
 
-  const handleConnect = async () => {
-    setBusy(true);
-    try {
-      await new Promise((r) => setTimeout(r, 600));
-      onConnect?.();
-    } finally {
-      setBusy(false);
+  const handleConnect = () => {
+    const injectedConnector = connectors.find((c) => c.id === 'injected');
+    if (injectedConnector) {
+      connect({ connector: injectedConnector });
     }
   };
 
+  const shortAddr = address
+    ? `${address.slice(0, 6)}…${address.slice(-4)}`
+    : '';
+
   return (
     <header className="flex justify-between items-center py-4 px-5 max-w-md mx-auto w-full">
-      <span className="text-[1.28rem] font-extrabold tracking-tight">🍣 SushiMobile</span>
-      <button
-        className={`py-2 px-5 rounded-xl font-semibold text-sm transition ${
-          connected
-            ? 'bg-black/20 border border-neon text-neon'
-            : 'bg-neon text-white hover:bg-pink-700'
-        }`}
-        onClick={handleConnect}
-        disabled={busy}
-        aria-busy={busy}
-        aria-label={connected ? 'Disconnect Wallet' : 'Connect Wallet'}
-      >
-        {connected ? `${address.slice(0, 6)}…${address.slice(-4)}` : busy ? 'Connecting…' : 'Connect'}
-      </button>
+      <span className="text-[1.28rem] font-extrabold tracking-tight text-white flex items-center gap-2">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <circle cx="14" cy="14" r="13" fill="#FF007A" />
+          <text x="14" y="19" textAnchor="middle" fontSize="14" fill="white" fontWeight="bold">S</text>
+        </svg>
+        SushiMobile
+      </span>
+      {isConnected ? (
+        <button
+          className="py-2 px-5 rounded-xl font-semibold text-sm bg-black/20 border border-neon text-neon transition hover:bg-neon/10"
+          onClick={() => disconnect()}
+          aria-label="Disconnect Wallet"
+        >
+          {shortAddr}
+        </button>
+      ) : (
+        <button
+          className="py-2 px-5 rounded-xl font-semibold text-sm bg-neon text-white transition hover:bg-pink-700 disabled:opacity-50"
+          onClick={handleConnect}
+          disabled={isPending}
+          aria-label="Connect Wallet"
+        >
+          {isPending ? 'Connecting…' : 'Connect'}
+        </button>
+      )}
     </header>
   );
 }
