@@ -16,8 +16,8 @@ export default function TokenSelectorSheet({ open, onSelect, onClose }) {
         className="fixed inset-0 z-40 bg-black/70 backdrop-blur-md"
         onClick={onClose}
       />
-      <div className="fixed left-0 right-0 bottom-0 z-50 glass-sushi rounded-t-3xl p-6 pb-8 backdrop-blur-xl max-w-md mx-auto shadow-neon-lg">
-        <div className="flex items-center justify-between mb-6">
+      <div className="fixed left-0 right-0 bottom-0 z-50 glass-sushi rounded-t-3xl backdrop-blur-xl max-w-md mx-auto shadow-neon-lg flex flex-col" style={{ height: '70vh' }}>
+        <div className="flex items-center justify-between p-6 pb-4 flex-shrink-0">
           <div className="flex items-center gap-3">
             <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
               <circle cx="11" cy="11" r="10" stroke="#FF007A" strokeWidth="1.5" fill="rgba(255,0,122,0.08)" />
@@ -28,21 +28,23 @@ export default function TokenSelectorSheet({ open, onSelect, onClose }) {
           </div>
           <button onClick={onClose} className="text-gray-500 hover:text-neon transition-colors text-xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-neon/10">✕</button>
         </div>
-        <div className="relative mb-4">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" width="16" height="16" viewBox="0 0 16 16" fill="none">
-            <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
-            <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          <input
-            autoFocus
-            placeholder="Search token…"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-xl glass-sushi neon-border text-sm text-white placeholder-gray-600 outline-none focus:shadow-neon transition-all duration-300"
-            aria-label="Search tokens"
-          />
+        <div className="px-6 pb-3 flex-shrink-0">
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600" width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="7" cy="7" r="5" stroke="currentColor" strokeWidth="1.5" />
+              <path d="M11 11l3 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
+            <input
+              autoFocus
+              placeholder="Search token…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="w-full pl-10 pr-4 py-3 rounded-xl glass-sushi neon-border text-sm text-white placeholder-gray-600 outline-none focus:shadow-neon transition-all duration-300"
+              aria-label="Search tokens"
+            />
+          </div>
         </div>
-        <div className="max-h-[50vh] overflow-y-auto pr-1 space-y-1">
+        <div className="flex-1 overflow-y-auto px-6 pb-6 space-y-1">
           {list.map((token) => (
             <button
               key={token.symbol}
