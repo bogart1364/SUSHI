@@ -11,16 +11,18 @@ export default function Toast() {
   }, [toasts, remove]);
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] space-y-2 w-[90%] max-w-md">
+    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] space-y-2 w-[90%] max-w-md pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
           role="status"
-          className={`px-4 py-3 rounded-xl border backdrop-blur-md shadow-lg ${
-            t.type === 'error' ? 'bg-[#2b0b10]/80 border-[#ff4d4f]/30' : 'bg-glass border-border'
+          className={`px-4 py-3 rounded-2xl glass-sushi shadow-neon animate-fade-in ${
+            t.type === 'error'
+              ? 'neon-border border-error/30'
+              : 'neon-border'
           }`}
         >
-          <p className="text-sm">{t.message}</p>
+          <p className="text-sm text-white">{t.message}</p>
         </div>
       ))}
     </div>

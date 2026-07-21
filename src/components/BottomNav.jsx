@@ -1,37 +1,47 @@
 import { useUIStore } from '../state/uiStore';
 
-const SwapIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <path d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+const SushiSwapIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="8" cy="12" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <circle cx="16" cy="12" r="5" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M11 9.5c1.5-1 3.5-1 5 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <path d="M11 14.5c1.5 1 3.5 1 5 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+    <circle cx="6" cy="12" r="1.5" fill="currentColor" opacity="0.6" />
+    <circle cx="18" cy="12" r="1.5" fill="currentColor" opacity="0.6" />
   </svg>
 );
 
-const PortfolioIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="4" width="20" height="16" rx="2" />
-    <path d="M2 10h20" />
-    <path d="M12 4v16" />
+const BentoBoxIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <line x1="12" y1="3" x2="12" y2="21" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <line x1="3" y1="12" x2="12" y2="12" stroke="currentColor" strokeWidth="1" opacity="0.5" />
+    <circle cx="7.5" cy="7.5" r="2" fill="currentColor" opacity="0.4" />
+    <rect x="14" y="5" width="5" height="4" rx="1" fill="currentColor" opacity="0.3" />
+    <path d="M5 14h6" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.5" />
+    <path d="M14 14c0 3 2 4 4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" fill="none" opacity="0.5" />
   </svg>
 );
 
-const EarnIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="10" />
-    <path d="M12 6v12M9 9.5c0-1.38 1.34-2.5 3-2.5s3 1.12 3 2.5-1.34 2.5-3 2.5-3 1.12-3 2.5 1.34 2.5 3 2.5" />
+const SashimiIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path d="M4 18c2-6 8-12 16-14-2 8-8 14-16 14z" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinejoin="round" />
+    <path d="M8 14c2-3 5-6 8-8" stroke="currentColor" strokeWidth="1" opacity="0.4" strokeLinecap="round" />
+    <circle cx="16" cy="6" r="1" fill="currentColor" opacity="0.5" />
   </svg>
 );
 
 const SettingsIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" opacity="0.6" />
   </svg>
 );
 
 const items = [
-  { icon: SwapIcon, text: 'Swap' },
-  { icon: PortfolioIcon, text: 'Portfolio' },
-  { icon: EarnIcon, text: 'Earn' },
+  { icon: SushiSwapIcon, text: 'Swap' },
+  { icon: BentoBoxIcon, text: 'Portfolio' },
+  { icon: SashimiIcon, text: 'Earn' },
   { icon: SettingsIcon, text: 'Settings' }
 ];
 
@@ -40,22 +50,27 @@ export default function BottomNav() {
   const setActive = useUIStore((s) => s.setActiveTab);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto flex bg-black/60 border-t border-border backdrop-blur-md shadow-xl">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 max-w-md mx-auto flex bg-sushiCard/90 border-t border-neon/10 backdrop-blur-xl shadow-neon">
       {items.map((item) => {
         const Icon = item.icon;
+        const isActive = active === item.text;
         return (
           <button
             key={item.text}
             onClick={() => setActive(item.text)}
-            className={`flex-1 py-3 flex flex-col items-center font-medium transition ${
-              active === item.text ? 'text-neon' : 'text-gray-400'
+            className={`flex-1 py-3 flex flex-col items-center gap-1 transition-all duration-300 ${
+              isActive
+                ? 'text-neon'
+                : 'text-gray-500 hover:text-gray-300'
             }`}
-            aria-current={active === item.text ? 'page' : undefined}
+            aria-current={isActive ? 'page' : undefined}
           >
-            <span className="mb-1">
+            <div className={`transition-all duration-300 ${isActive ? 'scale-110 drop-shadow-[0_0_8px_rgba(255,0,122,0.5)]' : ''}`}>
               <Icon />
+            </div>
+            <span className={`text-[10px] font-medium tracking-wide ${isActive ? 'neon-text' : ''}`}>
+              {item.text}
             </span>
-            <span className="text-xs">{item.text}</span>
           </button>
         );
       })}
