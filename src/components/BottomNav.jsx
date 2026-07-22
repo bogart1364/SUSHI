@@ -9,6 +9,12 @@ const icons = {
       <path d="M11 14.5c1.5 1 3.5 1 5 0" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
     </svg>
   ),
+  Market: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+      <path d="M3 17l4-8 4 6 4-10 4 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <circle cx="18" cy="11" r="2" stroke="currentColor" strokeWidth="1.5" fill="none" />
+    </svg>
+  ),
   Portfolio: (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
       <rect x="3" y="3" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.5" fill="none" />
@@ -40,10 +46,10 @@ export default function BottomNav() {
           <button
             key={key}
             onClick={() => setActive(key)}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 rounded-lg transition-all ${active === key ? 'text-neon' : 'text-gray-600'}`}
+            className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all ${active === key ? 'text-neon' : 'text-gray-600'}`}
           >
             {icons[key]}
-            <span className="text-[9px] font-medium">{key}</span>
+            <span className="text-[8px] font-medium">{key}</span>
           </button>
         ))}
       </div>

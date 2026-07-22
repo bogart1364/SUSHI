@@ -13,6 +13,8 @@ import Toast from './components/Toast';
 import Portfolio from './components/Portfolio';
 import Earn from './components/Earn';
 import Settings from './components/Settings';
+import Market from './components/Market';
+import TokenDetail from './components/TokenDetail';
 import { useUIStore } from './state/uiStore';
 
 function App() {
@@ -23,9 +25,21 @@ function App() {
   const [sendOpen, setSendOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [selectedToken, setSelectedToken] = useState(null);
+  const [tokenDetailOpen, setTokenDetailOpen] = useState(false);
   const active = useUIStore((s) => s.activeTab);
 
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [active]);
+
+  const handleSelectToken = (token) => {
+    setSelectedToken(token);
+    setTokenDetailOpen(true);
+  };
+
+  const handleTradeFromDetail = () => {
+    setTokenDetailOpen(false);
+    useUIStore.getState().setActiveTab('Swap');
+  };
 
   return (
     <div className="h-full flex flex-col bg-[#0a0a0f] font-apple">
@@ -34,6 +48,7 @@ function App() {
       <div className="flex-1 overflow-y-auto scroll-area" style={{ paddingBottom: 72 }}>
         <div className="flex flex-col items-center w-full max-w-lg mx-auto px-3 pt-3">
           {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={(t) => { setSheetType(t); setSheetOpen(true); }} />}
+          {active === 'Market' && <Market onSelectToken={handleSelectToken} />}
           {active === 'Portfolio' && <Portfolio onOpenSend={() => setSendOpen(true)} onOpenReceive={() => setReceiveOpen(true)} onOpenBuy={() => setBuyOpen(true)} />}
           {active === 'Earn' && <Earn />}
           {active === 'Settings' && <Settings slippage={swap.slippage} setSlippage={swap.setSlippage} deadline={swap.deadline} setDeadline={swap.setDeadline} />}
@@ -45,6 +60,7 @@ function App() {
       <SendModal open={sendOpen} onClose={() => setSendOpen(false)} />
       <ReceiveModal open={receiveOpen} onClose={() => setReceiveOpen(false)} />
       <BuyModal open={buyOpen} onClose={() => setBuyOpen(false)} />
+      <TokenDetail token={selectedToken} open={tokenDetailOpen} onClose={() => setTokenDetailOpen(false)} onTrade={handleTradeFromDetail} />
 
       <BottomNav />
       <Toast />
