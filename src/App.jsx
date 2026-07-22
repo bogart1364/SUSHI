@@ -14,9 +14,11 @@ import Portfolio from './components/Portfolio';
 import Earn from './components/Earn';
 import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
+import { useAccount } from 'wagmi';
 
 function App() {
   const swap = useSwapState();
+  const { isConnected } = useAccount();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');

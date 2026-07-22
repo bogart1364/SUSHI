@@ -1,7 +1,9 @@
 import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function Header({ onOpenWallet }) {
   const { address, isConnected } = useAccount();
+  const { ready } = usePrivy();
 
   const shortAddr = address
     ? `${address.slice(0, 6)}…${address.slice(-4)}`
@@ -40,11 +42,12 @@ export default function Header({ onOpenWallet }) {
         </button>
       ) : (
         <button
-          className="bg-neon text-white py-2 px-5 rounded-xl font-semibold text-sm transition-all duration-300 hover:bg-pink-600 hover:shadow-neon active:scale-95"
+          disabled={!ready}
+          className="bg-neon text-white py-2 px-5 rounded-xl font-semibold text-sm transition-all duration-300 hover:bg-pink-600 hover:shadow-neon active:scale-95 disabled:opacity-40"
           onClick={onOpenWallet}
           aria-label="Connect Wallet"
         >
-          Connect
+          {ready ? 'Connect' : 'Loading…'}
         </button>
       )}
     </header>
