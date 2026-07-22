@@ -1,21 +1,8 @@
 import { useAccount } from 'wagmi';
-import { usePrivy } from '@privy-io/react-auth';
 
 export default function Header({ onOpenWallet }) {
   const { address, isConnected } = useAccount();
-  const { ready, connectWallet } = usePrivy();
-
-  const shortAddr = address
-    ? `${address.slice(0, 6)}…${address.slice(-4)}`
-    : '';
-
-  const handleClick = () => {
-    if (isConnected) {
-      onOpenWallet();
-    } else if (ready) {
-      connectWallet();
-    }
-  };
+  const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '';
 
   return (
     <header className="sticky top-0 z-40 w-full bg-[#0a0a0f]/80 backdrop-blur-xl border-b border-white/5">
@@ -30,12 +17,9 @@ export default function Header({ onOpenWallet }) {
           <span className="text-base font-bold text-white">Sushi<span className="text-neon">Mobile</span></span>
         </div>
         <button
-          disabled={!ready && !isConnected}
-          onClick={handleClick}
+          onClick={onOpenWallet}
           className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all active:scale-95 ${
-            isConnected
-              ? 'bg-white/5 border border-white/10 text-neon'
-              : 'bg-neon text-white'
+            isConnected ? 'bg-white/5 border border-white/10 text-neon' : 'bg-neon text-white'
           }`}
         >
           {isConnected ? shortAddr : 'Connect'}
