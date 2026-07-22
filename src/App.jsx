@@ -14,12 +14,9 @@ import Portfolio from './components/Portfolio';
 import Earn from './components/Earn';
 import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
-import { useAccount } from 'wagmi';
 
 function App() {
   const swap = useSwapState();
-  const { isConnected } = useAccount();
-
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');
   const [walletOpen, setWalletOpen] = useState(false);
@@ -33,46 +30,18 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [active]);
 
-  const handleOpenSheet = (type) => {
-    setSheetType(type);
-    setSheetOpen(true);
-  };
-
-  const handleSelectToken = (token) => {
-    if (sheetType === 'from') swap.setFromToken(token);
-    else swap.setToToken(token);
-  };
-
   return (
-    <div className="bg-primary min-h-screen font-apple flex flex-col items-center bg-radial-glow">
+    <div className="min-h-screen bg-[#0a0a0f] font-apple flex flex-col">
       <Header onOpenWallet={() => setWalletOpen(true)} />
 
-      <main className="flex-1 w-full flex flex-col justify-start px-3 gap-4 max-w-md mx-auto pt-2 pb-24">
-        {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={handleOpenSheet} />}
-        {active === 'Portfolio' && (
-          <Portfolio
-            onOpenSend={() => setSendOpen(true)}
-            onOpenReceive={() => setReceiveOpen(true)}
-            onOpenBuy={() => setBuyOpen(true)}
-          />
-        )}
+      <main className="flex-1 flex flex-col items-center pt-3 pb-20 overflow-y-auto">
+        {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={(t) => { setSheetType(t); setSheetOpen(true); }} />}
+        {active === 'Portfolio' && <Portfolio onOpenSend={() => setSendOpen(true)} onOpenReceive={() => setReceiveOpen(true)} onOpenBuy={() => setBuyOpen(true)} />}
         {active === 'Earn' && <Earn />}
-        {active === 'Settings' && (
-          <Settings
-            slippage={swap.slippage}
-            setSlippage={swap.setSlippage}
-            deadline={swap.deadline}
-            setDeadline={swap.setDeadline}
-          />
-        )}
+        {active === 'Settings' && <Settings slippage={swap.slippage} setSlippage={swap.setSlippage} deadline={swap.deadline} setDeadline={swap.setDeadline} />}
       </main>
 
-      <TokenSelectorSheet
-        open={sheetOpen}
-        onSelect={handleSelectToken}
-        onClose={() => setSheetOpen(false)}
-        excludeSymbol={sheetType === 'from' ? swap.toToken.symbol : swap.fromToken.symbol}
-      />
+      <TokenSelectorSheet open={sheetOpen} onSelect={(t) => { if (sheetType === 'from') swap.setFromToken(t); else swap.setToToken(t); }} onClose={() => setSheetOpen(false)} excludeSymbol={sheetType === 'from' ? swap.toToken.symbol : swap.fromToken.symbol} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SendModal open={sendOpen} onClose={() => setSendOpen(false)} />
       <ReceiveModal open={receiveOpen} onClose={() => setReceiveOpen(false)} />

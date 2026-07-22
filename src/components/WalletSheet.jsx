@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { usePrivy } from '@privy-io/react-auth';
 import { useAccount, useDisconnect } from 'wagmi';
 
 function copyToClipboard(text) {
@@ -18,127 +17,53 @@ function copyToClipboard(text) {
 }
 
 export default function WalletSheet({ open, onClose }) {
-  const { ready, connectWallet, logout } = usePrivy();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [copied, setCopied] = useState(false);
-  const [connecting, setConnecting] = useState(false);
-  const [disconnecting, setDisconnecting] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!open) {
-      setCopied(false);
-      setConnecting(false);
-      setDisconnecting(false);
-      setError('');
-    }
+    if (!open) setCopied(false);
   }, [open]);
 
-  if (!open) return null;
+  if (!open || !isConnected || !address) return null;
 
-  const shortAddr = address
-    ? `${address.slice(0, 6)}…${address.slice(-4)}`
-    : '';
-
-  const handleConnect = async () => {
-    setConnecting(true);
-    setError('');
-    try {
-      await connectWallet();
-      onClose();
-    } catch (e) {
-      console.error('Connect error:', e);
-      setError(e?.message || 'Connection failed');
-    } finally {
-      setConnecting(false);
-    }
-  };
+  const shortAddr = `${address.slice(0, 6)}…${address.slice(-4)}`;
 
   const handleCopy = async () => {
     try {
       await copyToClipboard(address);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(false);
-    }
+    } catch {}
   };
 
-  const handleDisconnect = async () => {
-    setDisconnecting(true);
-    try {
-      if (isConnected) disconnect();
-      await logout();
-    } catch (e) {
-      console.error('Disconnect error:', e);
-    } finally {
-      setDisconnecting(false);
-      onClose();
-    }
+  const handleDisconnect = () => {
+    disconnect();
+    onClose();
   };
-
-  if (isConnected && address) {
-    return (
-      <div className="fixed inset-0 z-50">
-        <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-        <div className="absolute bottom-0 left-0 right-0 bg-[#141420] rounded-t-3xl border-t border-white/10 max-w-md mx-auto p-5 pb-8">
-          <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-          <div className="flex items-center gap-3 mb-5">
-            <div className="w-10 h-10 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
-              <div className="w-3 h-3 bg-success rounded-full" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-white font-bold text-sm">Connected</p>
-              <p className="text-gray-500 text-xs font-mono truncate">{shortAddr}</p>
-            </div>
-          </div>
-          <div className="space-y-2">
-            <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-[0.98] transition" onClick={handleCopy}>
-              {copied ? '✓ Copied!' : 'Copy Address'}
-            </button>
-            <button
-              disabled={disconnecting}
-              className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98] transition disabled:opacity-50"
-              onClick={handleDisconnect}
-            >
-              {disconnecting ? 'Disconnecting…' : 'Disconnect'}
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 bg-[#141420] rounded-t-3xl border-t border-white/10 max-w-md mx-auto p-5 pb-8">
-        <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-        <h2 className="text-lg font-bold text-white text-center mb-5">Connect Wallet</h2>
-
-        <button
-          disabled={!ready || connecting}
-          className="w-full py-3.5 rounded-xl bg-neon text-white font-bold text-sm active:scale-[0.98] transition disabled:opacity-50"
-          onClick={handleConnect}
-        >
-          {connecting ? (
-            <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              Connecting…
-            </span>
-          ) : 'Connect Wallet'}
-        </button>
-
-        {error && (
-          <div className="mt-3 p-2.5 rounded-lg bg-error/10 border border-error/20">
-            <p className="text-error text-xs text-center">{error}</p>
+      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
+      <div className="absolute bottom-0 left-0 right-0 mx-auto bg-[#141420] rounded-t-2xl border-t border-white/10 p-4 pb-6" style={{ maxWidth: 480 }}>
+        <div className="w-8 h-1 bg-white/20 rounded-full mx-auto mb-3" />
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center flex-shrink-0">
+            <div className="w-2.5 h-2.5 bg-success rounded-full" />
           </div>
-        )}
-
-        <p className="text-center text-gray-600 text-[11px] mt-3">
-          MetaMask, WalletConnect, Coinbase & more
-        </p>
+          <div className="min-w-0 flex-1">
+            <p className="text-white font-bold text-sm leading-tight">Connected</p>
+            <p className="text-gray-500 text-[11px] font-mono truncate">{shortAddr}</p>
+          </div>
+        </div>
+        <div className="space-y-2">
+          <button onClick={handleCopy} className="w-full py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-xs active:scale-[0.98] transition">
+            {copied ? '✓ Copied!' : 'Copy Address'}
+          </button>
+          <button onClick={handleDisconnect} className="w-full py-2.5 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-xs active:scale-[0.98] transition">
+            Disconnect
+          </button>
+        </div>
       </div>
     </div>
   );
