@@ -1,5 +1,5 @@
 import './index.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSwapState } from './hooks/useSwapState';
 import SwapCard from './components/SwapCard';
 import TokenSelectorSheet from './components/TokenSelectorSheet';
@@ -20,6 +20,10 @@ function App() {
   const [walletOpen, setWalletOpen] = useState(false);
 
   const active = useUIStore((s) => s.activeTab);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [active]);
 
   const handleOpenSheet = (type) => {
     setSheetType(type);
