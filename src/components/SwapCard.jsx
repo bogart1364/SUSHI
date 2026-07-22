@@ -21,7 +21,8 @@ export default function SwapCard({
   error,
   canSwap,
   networkFeeUSD,
-  onOpenTokenSheet
+  onOpenTokenSheet,
+  isConnected,
 }) {
   const pushToast = useUIStore((s) => s.pushToast);
 
@@ -39,6 +40,17 @@ export default function SwapCard({
 
   return (
     <GlassContainer className="w-full max-w-md mx-auto px-4 pt-5 pb-6 relative z-20" ariaLabel="Swap section">
+      {!isConnected ? (
+        <div className="text-center py-8">
+          <svg className="mx-auto mb-3" width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <rect x="4" y="12" width="40" height="28" rx="4" stroke="#FF007A" strokeWidth="2" fill="none" />
+            <circle cx="36" cy="26" r="4" stroke="#FF007A" strokeWidth="1.5" fill="none" />
+            <path d="M12 20h12" stroke="#FF007A" strokeWidth="1.5" strokeLinecap="round" />
+          </svg>
+          <p className="text-gray-400 text-sm">Connect your wallet to swap</p>
+        </div>
+      ) : (
+      <>
       <div className="flex items-center justify-between mb-4">
         <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">Swap</span>
         <span className="text-xs text-gray-600">Slippage: 0.5%</span>
@@ -164,6 +176,8 @@ export default function SwapCard({
           'Swap'
         )}
       </button>
+      </>
+      )}
     </GlassContainer>
   );
 }
