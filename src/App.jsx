@@ -1,5 +1,5 @@
 import './index.css';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useSwapState } from './hooks/useSwapState';
 import SwapCard from './components/SwapCard';
 import TokenSelectorSheet from './components/TokenSelectorSheet';
@@ -14,13 +14,13 @@ import Portfolio from './components/Portfolio';
 import Earn from './components/Earn';
 import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
-import { usePrivy } from '@privy-io/react-auth';
 import { useAccount } from 'wagmi';
+import { useAppContext } from './main';
 
 function App() {
   const swap = useSwapState();
-  const { connectWallet } = usePrivy();
   const { isConnected } = useAccount();
+  const { hasPrivy } = useAppContext();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');
@@ -28,6 +28,7 @@ function App() {
   const [sendOpen, setSendOpen] = useState(false);
   const [receiveOpen, setReceiveOpen] = useState(false);
   const [buyOpen, setBuyOpen] = useState(false);
+  const [privyReady, setPrivyReady] = useState(false);
 
   const active = useUIStore((s) => s.activeTab);
 
@@ -35,11 +36,24 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [active]);
 
+  useEffect(() => {
+    if (hasPrivy) {
+      import('@privy-io/react-auth').then((m) => {
+        setPrivyReady(true);
+      }).catch(() => {});
+    }
+  }, [hasPrivy]);
+
   const handleOpenWallet = () => {
     if (isConnected) {
       setWalletOpen(true);
+    } else if (hasPrivy && privyReady) {
+      import('@privy-io/react-auth').then((m) => {
+        const privy = m.usePrivy?.();
+      }).catch(() => {});
+      setWalletOpen(true);
     } else {
-      connectWallet();
+      setWalletOpen(true);
     }
   };
 
