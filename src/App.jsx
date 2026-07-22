@@ -7,15 +7,10 @@ import WalletSheet from './components/WalletSheet';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
+import Portfolio from './components/Portfolio';
+import Earn from './components/Earn';
+import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
-
-function Placeholder({ title }) {
-  return (
-    <div className="max-w-md mx-auto w-full pt-12">
-      <div className="text-center text-gray-400">{title} — Coming Soon</div>
-    </div>
-  );
-}
 
 function App() {
   const swap = useSwapState();
@@ -40,9 +35,11 @@ function App() {
     <div className="bg-primary min-h-screen font-apple flex flex-col items-center bg-radial-glow">
       <Header onOpenWallet={() => setWalletOpen(true)} />
 
-      <main className="flex-1 w-full flex flex-col justify-center px-3 gap-7 max-w-md mx-auto pb-6">
+      <main className="flex-1 w-full flex flex-col justify-center px-3 gap-7 max-w-md mx-auto pb-6 pt-4">
         {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={handleOpenSheet} />}
-        {active !== 'Swap' && <Placeholder title={active} />}
+        {active === 'Portfolio' && <Portfolio />}
+        {active === 'Earn' && <Earn />}
+        {active === 'Settings' && <Settings />}
       </main>
 
       <TokenSelectorSheet open={sheetOpen} onSelect={handleSelectToken} onClose={() => setSheetOpen(false)} />
