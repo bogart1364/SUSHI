@@ -2,33 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { useSwapState } from '../hooks/useSwapState';
 import { ROBINHOOD_CHAIN } from '../utils/robinhoodTokens';
-
-function formatPrice(price) {
-  if (!price && price !== 0) return '—';
-  if (price >= 1000) return `$${price.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-  if (price >= 1) return `$${price.toFixed(2)}`;
-  if (price >= 0.01) return `$${price.toFixed(4)}`;
-  return `$${price.toFixed(6)}`;
-}
-
-function formatChange(change) {
-  if (!change && change !== 0) return '—';
-  const sign = change >= 0 ? '+' : '';
-  return `${sign}${change.toFixed(2)}%`;
-}
-
-function formatMarketCap(cap) {
-  if (!cap) return '—';
-  if (cap >= 1e12) return `$${(cap / 1e12).toFixed(2)}T`;
-  if (cap >= 1e9) return `$${(cap / 1e9).toFixed(2)}B`;
-  if (cap >= 1e6) return `$${(cap / 1e6).toFixed(2)}M`;
-  return `$${cap.toLocaleString()}`;
-}
-
-function shortenAddress(addr) {
-  if (!addr) return '';
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-}
+import { formatPrice, formatChange, formatCompact } from '../utils/format';
 
 export default function TokenDetail({ token, open, onClose, onTrade }) {
   const { isConnected } = useAccount();
@@ -111,11 +85,11 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
             <p className="text-gray-500 text-[9px] mb-0.5">Market Cap</p>
-            <p className="text-white font-semibold text-xs">{formatMarketCap(token.marketCap)}</p>
+            <p className="text-white font-semibold text-xs">{formatCompact(token.marketCap)}</p>
           </div>
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
             <p className="text-gray-500 text-[9px] mb-0.5">24h Volume</p>
-            <p className="text-white font-semibold text-xs">{formatMarketCap(token.volume24h)}</p>
+            <p className="text-white font-semibold text-xs">{formatCompact(token.volume24h)}</p>
           </div>
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
             <p className="text-gray-500 text-[9px] mb-0.5">Chain</p>
