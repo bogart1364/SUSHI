@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 
 const WALLET_LOGOS = {
@@ -27,30 +28,37 @@ const WALLET_LOGOS = {
       <path d="M20 14v12M14 20h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
     </svg>
   ),
-  'safe': (
-    <svg width="32" height="32" viewBox="0 0 40 40" fill="none">
-      <rect width="40" height="40" rx="12" fill="#12FF88"/>
-      <path d="M20 8l10 5v6c0 6-4 10-10 11-6-1-10-5-10-11v-6l10-5z" fill="white" opacity="0.2"/>
-      <path d="M15 20l4 4 6-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-    </svg>
-  ),
 };
 
 export default function WalletSheet({ open, onClose }) {
-  const { connectors, connect, isPending } = useConnect();
-  const { address, isConnected } = useAccount();
+  const { connectors, connect, isPending, error } = useConnect();
+  const { isConnected, address } = useAccount();
   const { disconnect } = useDisconnect();
+  const [connectingId, setConnectingId] = useState(null);
+  const [connectError, setConnectError] = useState('');
 
   if (!open) return null;
 
   const walletData = {
     'injected': { name: 'MetaMask', desc: 'Browser extension' },
-    'walletConnect': { name: 'WalletConnect', desc: 'Scan QR code' },
+    'walletConnect': { name: 'WalletConnect', desc: 'Scan QR with any wallet' },
     'coinbaseWalletSDK': { name: 'Coinbase Wallet', desc: 'Coinbase app' },
-    'safe': { name: 'Safe', desc: 'Multisig wallet' },
   };
 
   const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '';
+
+  const handleConnect = async (connector) => {
+    setConnectingId(connector.id);
+    setConnectError('');
+    try {
+      await connect({ connector });
+      onClose();
+    } catch (e) {
+      setConnectError(e.message || 'Connection failed. Make sure you have a wallet installed.');
+    } finally {
+      setConnectingId(null);
+    }
+  };
 
   if (isConnected) {
     return (
@@ -71,15 +79,16 @@ export default function WalletSheet({ open, onClose }) {
 
             <div className="space-y-2">
               <button
-                className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm hover:bg-white/10 transition active:scale-[0.98]"
+                className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-[0.98] transition"
                 onClick={() => {
                   navigator.clipboard.writeText(address);
+                  onClose();
                 }}
               >
                 Copy Address
               </button>
               <button
-                className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm hover:bg-error/20 transition active:scale-[0.98]"
+                className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98] transition"
                 onClick={() => {
                   disconnect();
                   onClose();
@@ -105,15 +114,14 @@ export default function WalletSheet({ open, onClose }) {
           <div className="space-y-2">
             {connectors.map((connector) => {
               const data = walletData[connector.id] || { name: connector.name || 'Wallet', desc: 'Connect' };
+              const isLoading = connectingId === connector.id;
+
               return (
                 <button
                   key={connector.id}
-                  disabled={isPending}
-                  className="flex w-full items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition active:scale-[0.98]"
-                  onClick={() => {
-                    connect({ connector });
-                    onClose();
-                  }}
+                  disabled={isPending || isLoading}
+                  className="flex w-full items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition active:scale-[0.98] disabled:opacity-50"
+                  onClick={() => handleConnect(connector)}
                 >
                   <div className="w-9 h-9 rounded-lg overflow-hidden flex-shrink-0">
                     {WALLET_LOGOS[connector.id] || (
@@ -126,11 +134,24 @@ export default function WalletSheet({ open, onClose }) {
                     <p className="text-white font-semibold text-sm">{data.name}</p>
                     <p className="text-gray-500 text-[11px]">{data.desc}</p>
                   </div>
-                  {isPending && <div className="w-4 h-4 border-2 border-neon border-t-transparent rounded-full animate-spin" />}
+                  {isLoading && <div className="w-4 h-4 border-2 border-neon border-t-transparent rounded-full animate-spin" />}
                 </button>
               );
             })}
           </div>
+
+          {connectError && (
+            <div className="mt-3 p-2 rounded-lg bg-error/10 border border-error/20">
+              <p className="text-error text-xs text-center">{connectError}</p>
+            </div>
+          )}
+
+          <p className="text-center text-gray-600 text-[11px] mt-3">
+            No wallet?{' '}
+            <a href="https://ethereum.org/en/wallets/" target="_blank" rel="noopener noreferrer" className="text-neon">
+              Get one
+            </a>
+          </p>
         </div>
       </div>
     </div>
