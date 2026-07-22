@@ -1,43 +1,47 @@
 import { useConnect } from 'wagmi';
 
-const MetaMaskLogo = () => (
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="#1B1B1B" />
-    <path d="M26.2 8.5L20 13l1.8 6.5h-7.6L16 13l-6.2-4.5 12.8 17.5h5.6L26.2 8.5z" fill="#E2761B" stroke="#E2761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M10.8 8.5L16 13l-2 6.5-5.2-11z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M24 24l-2 3-6.2.3 6.2-3.3z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M25.2 27l-6.2-.3-5.4-3.4 7.4 3.7z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M13.8 29.5l3.4-1.7-3-2.5z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M21.6 27.8l-3.4 1.7.6-3.7z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M24 19.5H12l-1.5 5.5 7.4.3h7.6l-1.5-5.8z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-    <path d="M22.8 13l2 6.5h-4l2-6.5z" fill="#E4761B" stroke="#E4761B" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+const WALLET_LOGOS = {
+  'injected': 'https://raw.githubusercontent.com/nickmetsch/walletconnect-logo/main/metamask-fox.svg',
+  'walletConnect': 'https://raw.githubusercontent.com/nickmetsch/walletconnect-logo/main/walletconnect-circle-blue.svg',
+  'coinbaseWalletSDK': 'https://raw.githubusercontent.com/nickmetsch/coinbase-wallet-logo/main/coinbase-wallet-logo.svg',
+};
 
-const WalletConnectLogo = () => (
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="#1B1B1B" />
-    <path d="M12.5 14.5c3-3 8-3 11 0l.5.5c.15.15.15.4 0 .55l-1.3 1.3c-.08.08-.2.08-.28 0l-.5-.5c-2.1-2.1-5.5-2.1-7.6 0l-.55.55c-.08.08-.08-.2 0-.28l-1.3-1.3c-.15-.15-.15-.4 0-.55l.6-.5z" fill="#3B99FC"/>
-    <path d="M16.5 18.5l-.5.5c-.08.08-.2.08-.28 0l-1.3-1.3c-.15-.15-.15-.4 0-.55l2.5-2.5c.08-.08.2-.08.28 0l2.5 2.5c.15.15.15.4 0 .55l-1.3 1.3c-.08.08-.2.08-.28 0l-.6-.7z" fill="#3B99FC"/>
-    <path d="M23.5 14.5c3 3 3 8 0 11l-.5.5c-.15.15-.4.15-.55 0l-1.3-1.3c-.08-.08-.08-.2 0-.28l.5-.5c2.1-2.1 2.1-5.5 0-7.6l-.55-.55c-.08-.08-.08-.2 0-.28l1.3-1.3c.15-.15.4-.15.55 0l.5.5z" fill="#3B99FC"/>
-  </svg>
-);
-
-const CoinbaseLogo = () => (
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="#1B1B1B" />
-    <rect x="10" y="10" width="16" height="16" rx="4" fill="#0052FF" />
-    <path d="M18 14v8M14 18h8" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-  </svg>
-);
-
-const SafeLogo = () => (
-  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-    <rect width="36" height="36" rx="10" fill="#1B1B1B" />
-    <path d="M18 8l8 4v5c0 5-3 8-8 9-5-1-8-4-8-9v-5l8-4z" fill="#12FF88" opacity="0.2" stroke="#12FF88" strokeWidth="1.5"/>
-    <path d="M14 18l3 3 5-6" stroke="#12FF88" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-  </svg>
-);
+const FALLBACK_ICONS = {
+  'injected': (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="12" fill="#F6851B"/>
+      <path d="M20 8l8 4.5v9c0 5.5-3.5 9-8 10-4.5-1-8-4.5-8-10v-9l8-4.5z" fill="#E2761B"/>
+      <path d="M20 12c2.5 0 4.5 1.5 5.5 4h-11c1-2.5 3-4 5.5-4z" fill="#E2761B"/>
+      <path d="M14.5 17h11c.3 1 .5 2 .5 3-2.5 4-6 5.5-6 5.5s-3.5-1.5-6-5.5c0-1 .2-2 .5-3z" fill="#CD6116"/>
+      <path d="M15 22l-1 4.5 6-.5-5-4z" fill="#E4761B"/>
+      <path d="M25 22l1 4.5-6-.5 5-4z" fill="#E4761B"/>
+      <path d="M25.5 17h-11c-.2-.7-.5-1.3-.8-2h12.6c-.3.7-.6 1.3-.8 2z" fill="#E4761B"/>
+    </svg>
+  ),
+  'walletConnect': (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="12" fill="#3B99FC"/>
+      <circle cx="15" cy="16" r="3.5" fill="white"/>
+      <circle cx="25" cy="16" r="3.5" fill="white"/>
+      <path d="M12 22c3 4.5 10 4.5 16 0" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+      <path d="M15 28c2 2.5 8 2.5 10 0" stroke="white" strokeWidth="2" fill="none" strokeLinecap="round"/>
+    </svg>
+  ),
+  'coinbaseWalletSDK': (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="12" fill="#0052FF"/>
+      <circle cx="20" cy="20" r="8" fill="white" opacity="0.3"/>
+      <path d="M20 14v12M14 20h12" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+    </svg>
+  ),
+  'safe': (
+    <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <rect width="40" height="40" rx="12" fill="#12FF88"/>
+      <path d="M20 8l10 5v6c0 6-4 10-10 11-6-1-10-5-10-11v-6l10-5z" fill="white" opacity="0.2"/>
+      <path d="M15 20l4 4 6-8" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+    </svg>
+  ),
+};
 
 export default function WalletSheet({ open, onClose }) {
   const { connectors, connect, isPending } = useConnect();
@@ -45,78 +49,76 @@ export default function WalletSheet({ open, onClose }) {
   if (!open) return null;
 
   const walletData = {
-    'injected': { name: 'Browser Wallet', desc: 'MetaMask, Brave, or installed wallet', icon: <MetaMaskLogo /> },
-    'walletConnect': { name: 'WalletConnect', desc: 'Scan QR code with mobile wallet', icon: <WalletConnectLogo /> },
-    'coinbaseWalletSDK': { name: 'Coinbase Wallet', desc: 'Connect with Coinbase Wallet', icon: <CoinbaseLogo /> },
-    'safe': { name: 'Safe', desc: 'Connect with Safe multisig', icon: <SafeLogo /> },
+    'injected': { name: 'MetaMask', desc: 'Connect with MetaMask extension' },
+    'walletConnect': { name: 'WalletConnect', desc: 'Scan QR code with any wallet' },
+    'coinbaseWalletSDK': { name: 'Coinbase Wallet', desc: 'Connect with Coinbase' },
+    'safe': { name: 'Safe', desc: 'Connect with Safe multisig' },
   };
 
   return (
-    <>
-      <button
-        aria-label="Close wallet selector"
-        className="fixed inset-0 z-40 bg-black/70"
-        onClick={onClose}
-      />
-      <div
-        className="fixed left-0 right-0 bottom-0 z-50 bg-[#12121a] rounded-t-3xl border-t border-neon/20 max-w-md mx-auto flex flex-col"
-        style={{ height: '50vh' }}
-      >
-        <div className="flex items-center justify-between px-6 pt-5 pb-3 flex-shrink-0">
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/80" onClick={onClose} />
+      <div className="relative bg-[#141420] rounded-3xl border border-white/10 w-[90%] max-w-sm p-5 z-10">
+        <div className="flex items-center justify-between mb-5">
           <h2 className="text-lg font-bold text-white">Connect Wallet</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-white text-xl w-8 h-8 flex items-center justify-center rounded-full">✕</button>
+          <button onClick={onClose} className="text-gray-500 hover:text-white w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition">✕</button>
         </div>
 
-        <div className="overflow-y-auto px-6 pb-6 flex-1">
-          <div className="space-y-3">
-            {connectors.map((connector) => {
-              const data = walletData[connector.id] || {
-                name: connector.name || 'Wallet',
-                desc: 'Connect wallet',
-                icon: (
-                  <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-                    <rect width="36" height="36" rx="10" fill="#1B1B1B" />
-                    <circle cx="18" cy="18" r="8" stroke="#FF007A" strokeWidth="1.5" fill="none" />
+        <div className="space-y-2">
+          {connectors.map((connector) => {
+            const data = walletData[connector.id] || { name: connector.name || 'Wallet', desc: 'Connect' };
+            const fallbackIcon = FALLBACK_ICONS[connector.id];
+            const logoUrl = WALLET_LOGOS[connector.id];
+
+            return (
+              <button
+                key={connector.id}
+                disabled={isPending}
+                className="flex w-full items-center gap-4 p-3.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all active:scale-[0.98]"
+                onClick={() => {
+                  connect({ connector });
+                  onClose();
+                }}
+              >
+                <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 bg-white/10 flex items-center justify-center">
+                  {logoUrl ? (
+                    <img
+                      src={logoUrl}
+                      alt={data.name}
+                      className="w-10 h-10"
+                      onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                      }}
+                    />
+                  ) : null}
+                  <div className={logoUrl ? 'hidden' : 'flex'} style={logoUrl ? { display: 'none' } : {}}>
+                    {fallbackIcon}
+                  </div>
+                </div>
+                <div className="text-left flex-1">
+                  <p className="text-white font-semibold text-sm">{data.name}</p>
+                  <p className="text-gray-500 text-xs">{data.desc}</p>
+                </div>
+                {isPending ? (
+                  <div className="w-4 h-4 border-2 border-neon border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-gray-600">
+                    <path d="M6 3l5 5-5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
-                ),
-              };
-              return (
-                <button
-                  key={connector.id}
-                  disabled={isPending}
-                  className="flex w-full items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-neon/30 transition-all duration-200 active:scale-[0.98]"
-                  onClick={() => {
-                    connect({ connector });
-                    onClose();
-                  }}
-                >
-                  <div className="flex-shrink-0">
-                    {data.icon}
-                  </div>
-                  <div className="text-left flex-1">
-                    <p className="text-white font-semibold text-sm">{data.name}</p>
-                    <p className="text-gray-500 text-xs mt-0.5">{data.desc}</p>
-                  </div>
-                  {isPending ? (
-                    <div className="w-5 h-5 border-2 border-neon border-t-transparent rounded-full animate-spin" />
-                  ) : (
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="text-gray-600">
-                      <path d="M7 4l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-
-          <p className="text-center text-gray-600 text-xs mt-6">
-            New to Ethereum?{' '}
-            <a href="https://ethereum.org/en/wallets/" target="_blank" rel="noopener noreferrer" className="text-neon">
-              Learn more
-            </a>
-          </p>
+                )}
+              </button>
+            );
+          })}
         </div>
+
+        <p className="text-center text-gray-600 text-xs mt-4">
+          No wallet?{' '}
+          <a href="https://ethereum.org/en/wallets/" target="_blank" rel="noopener noreferrer" className="text-neon">
+            Get one
+          </a>
+        </p>
       </div>
-    </>
+    </div>
   );
 }
