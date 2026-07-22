@@ -1,40 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  ROBINHOOD_TOKENS,
-  filterRobinhoodTokens,
-  getTokensByCategory,
-} from '../utils/robinhoodTokens';
-import { fetchAllPrices } from '../services/priceService';
-
-// ─── Data normalization ───────────────────────────────────────────────────────
-// Merges static registry data with live price data into a single MarketToken.
-
-function normalizeToken(registryEntry, priceData) {
-  return {
-    // Registry fields
-    symbol: registryEntry.symbol,
-    name: registryEntry.name,
-    address: registryEntry.address,
-    chainId: registryEntry.chainId,
-    decimals: registryEntry.decimals,
-    type: registryEntry.type,
-    logo: registryEntry.logo,
-    description: registryEntry.description,
-    coingeckoId: registryEntry.coingeckoId || null,
-    stockTicker: registryEntry.stockTicker || null,
-
-    // Live price fields (null if unavailable)
-    price: priceData?.price ?? null,
-    change24h: priceData?.change24h ?? null,
-    marketCap: priceData?.marketCap ?? null,
-    volume24h: priceData?.volume24h ?? null,
-
-    // Extra stock data
-    dayHigh: priceData?.dayHigh ?? null,
-    dayLow: priceData?.dayLow ?? null,
-    previousClose: priceData?.previousClose ?? null,
-  };
-}
+import { fetchRobinhoodTokens } from '../services/dexScreener';
 
 // ─── Sorting comparators ──────────────────────────────────────────────────────
 
@@ -42,25 +7,43 @@ const comparators = {
   marketCap: (a, b) => (b.marketCap || 0) - (a.marketCap || 0),
   price: (a, b) => (b.price || 0) - (a.price || 0),
   change: (a, b) => Math.abs(b.change24h || 0) - Math.abs(a.change24h || 0),
+  volume: (a, b) => (b.volume24h || 0) - (a.volume24h || 0),
+  liquidity: (a, b) => (b.liquidity || 0) - (a.liquidity || 0),
   name: (a, b) => a.name.localeCompare(b.name),
+  age: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
 };
+
+// ─── Category filter functions ────────────────────────────────────────────────
+
+function filterByCategory(tokens, category) {
+  if (category === 'all') return tokens;
+  if (category === 'gainers') return tokens.filter(t => (t.change24h || 0) > 0);
+  if (category === 'losers') return tokens.filter(t => (t.change24h || 0) < 0);
+  if (category === 'new') {
+    const oneDayAgo = Date.now() - 86400000;
+    return tokens.filter(t => t.createdAt > oneDayAgo);
+  }
+  if (category === 'volume') return tokens.filter(t => (t.volume24h || 0) > 1000);
+  if (category === 'liquidity') return tokens.filter(t => (t.liquidity || 0) > 1000);
+  return tokens;
+}
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-const POLL_INTERVAL = 60_000;
+const POLL_INTERVAL = 30_000; // 30 seconds
 
 export function useMarketTokens() {
-  const [prices, setPrices] = useState({});
+  const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const load = useCallback(async () => {
     try {
-      const result = await fetchAllPrices(ROBINHOOD_TOKENS);
-      setPrices(result);
+      const data = await fetchRobinhoodTokens();
+      setTokens(data);
       setError(null);
     } catch (err) {
-      setError(err.message || 'Failed to load prices');
+      setError(err.message || 'Failed to load tokens');
     } finally {
       setLoading(false);
     }
@@ -72,31 +55,27 @@ export function useMarketTokens() {
     return () => clearInterval(id);
   }, [load]);
 
-  // Normalized token list with live prices merged in
-  const tokens = useMemo(() => {
-    return ROBINHOOD_TOKENS.map(t => normalizeToken(t, prices[t.symbol]));
-  }, [prices]);
-
   // Filter + sort helper
   const getFilteredTokens = useCallback(
     ({ query, category, sortBy }) => {
-      let list =
-        category === 'all'
-          ? filterRobinhoodTokens(query)
-          : getTokensByCategory(category).filter(
-              t =>
-                t.symbol.toLowerCase().includes((query || '').toLowerCase()) ||
-                t.name.toLowerCase().includes((query || '').toLowerCase())
-            );
+      let list = filterByCategory(tokens, category);
 
-      // Normalize with current prices
-      const normalized = list.map(t => normalizeToken(t, prices[t.symbol]));
+      // Search filter
+      const q = (query || '').trim().toLowerCase();
+      if (q) {
+        list = list.filter(
+          t =>
+            t.symbol.toLowerCase().includes(q) ||
+            t.name.toLowerCase().includes(q) ||
+            t.address.toLowerCase().includes(q)
+        );
+      }
 
       // Sort
       const cmp = comparators[sortBy] || comparators.marketCap;
-      return [...normalized].sort(cmp);
+      return [...list].sort(cmp);
     },
-    [prices]
+    [tokens]
   );
 
   return {

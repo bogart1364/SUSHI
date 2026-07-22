@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { TOKEN_CATEGORIES } from '../utils/robinhoodTokens';
 import { useMarketTokens } from '../hooks/useMarketTokens';
-import { formatPrice, formatChange } from '../utils/format';
+import { formatPrice, formatChange, formatCompact } from '../utils/format';
 
 export default function Market({ onSelectToken }) {
   const [search, setSearch] = useState('');
@@ -20,10 +20,10 @@ export default function Market({ onSelectToken }) {
       {/* Header */}
       <div className="mb-4">
         <div className="flex items-center gap-2 mb-1">
-          <h1 className="text-lg font-bold text-white">Robinhood Chain</h1>
-          <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-neon/20 text-neon">L2</span>
+          <h1 className="text-lg font-bold text-white">SushiSwap</h1>
+          <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-neon/20 text-neon">Robinhood</span>
         </div>
-        <p className="text-gray-500 text-[10px]">Chain ID: 4663 · ETH Gas · Live prices</p>
+        <p className="text-gray-500 text-[10px]">Chain ID: 4663 · Live data from DexScreener</p>
       </div>
 
       {/* Search */}
@@ -31,7 +31,7 @@ export default function Market({ onSelectToken }) {
         <input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search tokens, stocks, ETFs..."
+          placeholder="Search tokens by name, symbol, or address..."
           className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-xs outline-none focus:border-neon/50 placeholder-gray-600"
         />
         {search && (
@@ -68,9 +68,10 @@ export default function Market({ onSelectToken }) {
       {/* Sort controls */}
       <div className="flex gap-2 mb-3">
         {[
-          { key: 'marketCap', label: 'Market Cap' },
+          { key: 'marketCap', label: 'MC' },
           { key: 'price', label: 'Price' },
           { key: 'change', label: 'Change' },
+          { key: 'volume', label: 'Vol' },
         ].map((s) => (
           <button
             key={s.key}
@@ -84,10 +85,10 @@ export default function Market({ onSelectToken }) {
         ))}
       </div>
 
-      {/* Loading state */}
+      {/* Loading state — skeleton */}
       {loading && (
         <div className="space-y-1.5">
-          {[1, 2, 3, 4, 5].map((i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div
               key={i}
               className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/5 animate-pulse"
@@ -109,7 +110,7 @@ export default function Market({ onSelectToken }) {
       {/* Error state */}
       {error && !loading && (
         <div className="text-center py-6">
-          <p className="text-error text-xs mb-2">Failed to load prices</p>
+          <p className="text-error text-xs mb-2">Failed to load tokens</p>
           <p className="text-gray-600 text-[10px] mb-3">{error}</p>
           <button
             onClick={refetch}
@@ -125,30 +126,26 @@ export default function Market({ onSelectToken }) {
         <div className="space-y-1.5">
           {filteredTokens.map((token) => (
             <button
-              key={token.symbol}
+              key={token.address}
               onClick={() => onSelectToken(token)}
               className="w-full flex items-center gap-2.5 p-2.5 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-[0.98]"
             >
-              <img
-                src={token.logo}
-                alt={token.symbol}
-                className="w-8 h-8 rounded-full"
-                onError={(e) => {
-                  e.target.style.display = 'none';
-                }}
-              />
+              {token.logo ? (
+                <img
+                  src={token.logo}
+                  alt={token.symbol}
+                  className="w-8 h-8 rounded-full"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              ) : (
+                <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
+                  <span className="text-[10px] text-gray-500">{token.symbol[0]}</span>
+                </div>
+              )}
               <div className="flex-1 min-w-0 text-left">
                 <div className="flex items-center gap-1.5">
                   <p className="text-white font-semibold text-xs">{token.symbol}</p>
-                  <span className="px-1.5 py-0.5 rounded text-[8px] font-medium bg-white/10 text-gray-400">
-                    {token.type === 'stock'
-                      ? 'STOCK'
-                      : token.type === 'etf'
-                      ? 'ETF'
-                      : token.type === 'meme'
-                      ? 'MEME'
-                      : token.type.toUpperCase()}
-                  </span>
+                  <span className="text-gray-600 text-[9px]">/ {token.quoteSymbol}</span>
                 </div>
                 <p className="text-gray-500 text-[10px] truncate">{token.name}</p>
               </div>
@@ -169,11 +166,11 @@ export default function Market({ onSelectToken }) {
         </div>
       )}
 
-      {/* Empty state (after loading) */}
+      {/* Empty state */}
       {!loading && filteredTokens.length === 0 && !error && (
         <div className="text-center py-8">
           <p className="text-gray-600 text-xs">
-            {search ? `No tokens matching "${search}"` : 'No tokens in this category'}
+            {search ? `No tokens matching "${search}"` : 'No tokens found'}
           </p>
           {search && (
             <button
@@ -190,7 +187,7 @@ export default function Market({ onSelectToken }) {
       {!loading && (
         <div className="mt-4 p-3 rounded-xl bg-white/5 border border-white/5">
           <p className="text-gray-500 text-[9px] text-center">
-            {filteredTokens.length} tokens on Robinhood Chain (ID: 4663)
+            {filteredTokens.length} tokens on SushiSwap · Robinhood Chain (ID: 4663)
           </p>
         </div>
       )}

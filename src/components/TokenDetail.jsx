@@ -19,13 +19,12 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
   if (!open || !token) return null;
 
   const handleTrade = () => {
-    if (token.symbol === 'SUSHI' || token.type === 'stock' || token.type === 'etf') return;
     swap.setToToken({
       symbol: token.symbol,
       name: token.name,
       address: token.address,
       chainId: 4663,
-      decimals: token.decimals,
+      decimals: 18,
       logo: token.logo,
     });
     onTrade?.();
@@ -49,7 +48,9 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
     }
   };
 
-  const isStock = token.type === 'stock' || token.type === 'etf';
+  const ageText = token.createdAt
+    ? formatAge(Date.now() - token.createdAt)
+    : null;
 
   return (
     <div className="fixed inset-0 z-50">
@@ -57,13 +58,20 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
       <div className="absolute bottom-0 left-0 right-0 mx-auto bg-[#141420] rounded-t-2xl border-t border-white/10 p-4 pb-6 max-h-[85vh] overflow-y-auto scroll-area" style={{ maxWidth: 480 }}>
         <div className="w-8 h-1 bg-white/20 rounded-full mx-auto mb-4" />
 
+        {/* Token header */}
         <div className="flex items-center gap-3 mb-4">
-          <img
-            src={token.logo}
-            alt={token.symbol}
-            className="w-12 h-12 rounded-full"
-            onError={(e) => { e.target.style.display = 'none'; }}
-          />
+          {token.logo ? (
+            <img
+              src={token.logo}
+              alt={token.symbol}
+              className="w-12 h-12 rounded-full"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center">
+              <span className="text-lg text-gray-500">{token.symbol?.[0]}</span>
+            </div>
+          )}
           <div>
             <div className="flex items-center gap-2">
               <h2 className="text-white font-bold text-lg">{token.symbol}</h2>
@@ -75,33 +83,36 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
           </div>
         </div>
 
+        {/* Price + change */}
         <div className="flex items-baseline gap-3 mb-4">
           <p className="text-white font-bold text-2xl">{formatPrice(token.price)}</p>
-          <p className={`text-sm font-semibold ${(token.change24h || 0) >= 0 ? 'text-success' : 'text-error'}`}>
+          <p className={`text-sm font-semibold ${(token.change24h ?? 0) >= 0 ? 'text-success' : 'text-error'}`}>
             {formatChange(token.change24h)}
           </p>
         </div>
 
+        {/* Stats grid */}
         <div className="grid grid-cols-2 gap-2 mb-4">
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
             <p className="text-gray-500 text-[9px] mb-0.5">Market Cap</p>
             <p className="text-white font-semibold text-xs">{formatCompact(token.marketCap)}</p>
           </div>
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
+            <p className="text-gray-500 text-[9px] mb-0.5">Liquidity</p>
+            <p className="text-white font-semibold text-xs">{formatCompact(token.liquidity)}</p>
+          </div>
+          <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
             <p className="text-gray-500 text-[9px] mb-0.5">24h Volume</p>
             <p className="text-white font-semibold text-xs">{formatCompact(token.volume24h)}</p>
           </div>
           <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
-            <p className="text-gray-500 text-[9px] mb-0.5">Chain</p>
-            <p className="text-white font-semibold text-xs">Robinhood (4663)</p>
-          </div>
-          <div className="p-2.5 rounded-lg bg-white/5 border border-white/5">
-            <p className="text-gray-500 text-[9px] mb-0.5">Type</p>
-            <p className="text-white font-semibold text-xs capitalize">{token.type}</p>
+            <p className="text-gray-500 text-[9px] mb-0.5">24h Txns</p>
+            <p className="text-white font-semibold text-xs">{(token.txns24h || 0).toLocaleString()}</p>
           </div>
         </div>
 
-        {token.address && token.address !== '0x0000000000000000000000000000000000000000' && (
+        {/* Contract address */}
+        {token.address && (
           <div className="mb-4">
             <p className="text-gray-500 text-[10px] mb-2">Contract Address</p>
             <div className="flex items-center gap-2 p-2.5 rounded-lg bg-white/5 border border-white/5">
@@ -116,27 +127,22 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
           </div>
         )}
 
-        <div className="mb-4">
-          <p className="text-gray-500 text-[10px] mb-2">About {token.name}</p>
-          <p className="text-gray-400 text-[11px] leading-relaxed">{token.description}</p>
-        </div>
-
-        {isStock && (
-          <div className="mb-4 p-3 rounded-lg bg-neon/5 border border-neon/20">
-            <p className="text-neon text-[10px] font-medium mb-1">Tokenized Stock</p>
-            <p className="text-gray-400 text-[9px] leading-relaxed">
-              This is a tokenized debt security issued by Robinhood Assets (Jersey) Limited.
-              It provides economic exposure to the underlying stock but does not confer voting rights
-              or legal ownership. Available for trading 24/7 on Robinhood Chain.
-            </p>
+        {/* Age */}
+        {ageText && (
+          <div className="mb-4 p-2.5 rounded-lg bg-white/5 border border-white/5">
+            <div className="flex justify-between items-center">
+              <span className="text-gray-500 text-[9px]">Age</span>
+              <span className="text-white text-[10px] font-medium">{ageText}</span>
+            </div>
           </div>
         )}
 
+        {/* Network details */}
         <div className="mb-4">
-          <p className="text-gray-500 text-[10px] mb-2">Network Details</p>
+          <p className="text-gray-500 text-[10px] mb-2">Network</p>
           <div className="space-y-1.5">
             <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-              <span className="text-gray-500 text-[9px]">Network</span>
+              <span className="text-gray-500 text-[9px]">Chain</span>
               <span className="text-white text-[10px] font-medium">{ROBINHOOD_CHAIN.name}</span>
             </div>
             <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
@@ -144,40 +150,34 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
               <span className="text-white text-[10px] font-medium">{ROBINHOOD_CHAIN.chainId}</span>
             </div>
             <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-              <span className="text-gray-500 text-[9px]">Gas Token</span>
-              <span className="text-white text-[10px] font-medium">ETH</span>
+              <span className="text-gray-500 text-[9px]">DEX</span>
+              <span className="text-white text-[10px] font-medium">SushiSwap V3</span>
             </div>
             <div className="flex justify-between items-center p-2 rounded-lg bg-white/5">
-              <span className="text-gray-500 text-[9px]">RPC</span>
-              <span className="text-white text-[10px] font-medium truncate ml-2">rpc.mainnet.chain.robinhood.com</span>
+              <span className="text-gray-500 text-[9px]">Pair</span>
+              <span className="text-white text-[10px] font-medium">{token.symbol}/{token.quoteSymbol}</span>
             </div>
           </div>
         </div>
 
+        {/* Actions */}
         <div className="space-y-2">
-          {!isStock && token.symbol !== 'SUSHI' ? (
-            <button
-              onClick={handleTrade}
-              className="w-full py-3 rounded-xl bg-neon text-white font-bold text-sm active:scale-[0.98] transition"
-            >
-              Trade {token.symbol} with SUSHI
-            </button>
-          ) : isStock ? (
-            <a
-              href={`https://wallet.robinhood.com/chain`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full py-3 rounded-xl bg-neon text-white font-bold text-sm text-center active:scale-[0.98] transition block"
-            >
-              Trade on Robinhood Wallet
-            </a>
-          ) : (
-            <div className="w-full py-3 rounded-xl bg-white/5 text-gray-500 text-xs text-center font-medium">
-              You are viewing SUSHI
-            </div>
-          )}
+          <button
+            onClick={handleTrade}
+            className="w-full py-3 rounded-xl bg-neon text-white font-bold text-sm active:scale-[0.98] transition"
+          >
+            Trade {token.symbol} with SUSHI
+          </button>
 
           <div className="grid grid-cols-2 gap-2">
+            <a
+              href={token.pairUrl || `${ROBINHOOD_CHAIN.blockExplorer}/address/${token.address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="py-2.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-[10px] font-medium text-center active:scale-95 transition"
+            >
+              DexScreener
+            </a>
             <a
               href={`${ROBINHOOD_CHAIN.blockExplorer}/address/${token.address}`}
               target="_blank"
@@ -186,25 +186,6 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
             >
               Blockscout
             </a>
-            {!isStock && token.coingeckoId ? (
-              <a
-                href={`https://www.coingecko.com/en/coins/${token.coingeckoId}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-[10px] font-medium text-center active:scale-95 transition"
-              >
-                CoinGecko
-              </a>
-            ) : (
-              <a
-                href={`https://robinhood.com/us/en/about/crypto/${token.symbol.toLowerCase()}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="py-2.5 rounded-lg bg-white/5 border border-white/10 text-gray-400 text-[10px] font-medium text-center active:scale-95 transition"
-              >
-                Robinhood
-              </a>
-            )}
           </div>
 
           <button
@@ -217,4 +198,15 @@ export default function TokenDetail({ token, open, onClose, onTrade }) {
       </div>
     </div>
   );
+}
+
+function formatAge(ms) {
+  const seconds = Math.floor(ms / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d`;
 }
