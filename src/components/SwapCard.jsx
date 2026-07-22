@@ -40,7 +40,7 @@ export default function SwapCard({
 
   if (!isConnected) {
     return (
-      <GlassContainer className="w-full max-w-sm mx-auto px-4 py-6 relative z-20" ariaLabel="Swap section">
+      <GlassContainer className="w-full max-w-md mx-auto px-4 py-6 relative z-20" ariaLabel="Swap section">
         <div className="text-center py-4">
           <svg className="mx-auto mb-2" width="40" height="40" viewBox="0 0 48 48" fill="none">
             <rect x="4" y="12" width="40" height="28" rx="4" stroke="#FF007A" strokeWidth="2" fill="none" />
@@ -54,13 +54,13 @@ export default function SwapCard({
   }
 
   return (
-    <GlassContainer className="w-full max-w-sm mx-auto px-3 py-3 relative z-20" ariaLabel="Swap section">
+    <GlassContainer className="w-full max-w-md mx-auto px-4 py-4 relative z-20" ariaLabel="Swap section">
       <div className="flex items-center justify-between mb-3">
         <span className="text-[11px] font-medium text-gray-500 uppercase tracking-widest">Swap</span>
         <span className="text-[10px] text-gray-600">0.5%</span>
       </div>
 
-      <div className="bg-white/5 rounded-xl p-3 mb-1.5">
+      <div className="bg-white/5 rounded-xl p-3.5 mb-3">
         <div className="flex gap-2 items-center">
           <button
             aria-label="Select from token"
@@ -74,7 +74,7 @@ export default function SwapCard({
             </svg>
           </button>
           <input
-            className="bg-transparent text-right text-xl outline-none w-full px-0 font-bold text-white placeholder-gray-700"
+            className="bg-transparent text-right text-2xl outline-none w-full px-0 font-bold text-white placeholder-gray-700"
             value={amount}
             onChange={onAmountChange}
             placeholder="0.00"
@@ -90,7 +90,7 @@ export default function SwapCard({
         </div>
       </div>
 
-      <div className="flex justify-center -my-1.5 relative z-10">
+      <div className="flex justify-center my-3 relative z-10">
         <button
           aria-label="Switch tokens"
           disabled={switching || loading}
@@ -106,7 +106,7 @@ export default function SwapCard({
         </button>
       </div>
 
-      <div className="bg-white/5 rounded-xl p-3 mt-1.5">
+      <div className="bg-white/5 rounded-xl p-3.5 mt-3">
         <div className="flex gap-2 items-center">
           <button
             aria-label="Select to token"
@@ -120,7 +120,7 @@ export default function SwapCard({
             </svg>
           </button>
           <input
-            className="bg-transparent text-right text-xl outline-none w-full px-0 font-bold text-gray-400 select-none placeholder-gray-700"
+            className="bg-transparent text-right text-2xl outline-none w-full px-0 font-bold text-gray-400 select-none placeholder-gray-700"
             disabled
             value={amount ? (Number(amount) * getConversion()).toFixed(4) : ''}
             placeholder="0.00"
