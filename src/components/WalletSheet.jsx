@@ -15,8 +15,8 @@ export default function WalletSheet({ open, onClose }) {
     try {
       await connectWallet();
       onClose();
-    } catch (e) {
-      console.error(e);
+    } catch {
+      // Silent fail - wallet connection errors are expected
     }
     setLoading(false);
   };

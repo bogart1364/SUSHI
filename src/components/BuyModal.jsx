@@ -1,5 +1,3 @@
-import { useAccount } from 'wagmi';
-
 const onRamps = [
   { name: 'MoonPay', desc: 'Credit/Debit Card', url: 'https://moonpay.com', color: '#0075EB', icon: 'M' },
   { name: 'Ramp', desc: 'Bank Transfer', url: 'https://ramp.network', color: '#81E9A0', icon: 'R' },
@@ -8,7 +6,6 @@ const onRamps = [
 ];
 
 export default function BuyModal({ open, onClose }) {
-  const { address } = useAccount();
   if (!open) return null;
 
   return (
@@ -19,7 +16,7 @@ export default function BuyModal({ open, onClose }) {
         <h2 className="text-sm font-bold text-white text-center mb-3">Buy Crypto</h2>
         <div className="space-y-1.5 mb-3">
           {onRamps.map((ramp) => (
-            <a key={ramp.name} href={`${ramp.url}?wallet=${address}&currency=ETH`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 active:scale-[0.98] transition">
+            <a key={ramp.name} href={ramp.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2.5 p-2.5 rounded-lg bg-white/5 border border-white/10 active:scale-[0.98] transition">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-xs flex-shrink-0" style={{ background: ramp.color }}>{ramp.icon}</div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-xs">{ramp.name}</p>
