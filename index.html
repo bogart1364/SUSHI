@@ -3,12 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#000000" />
-    <meta name="description" content="SushiMobile — Apple-inspired mobile-first SushiSwap experience." />
+    <meta name="theme-color" content="#0a0a0f" />
+    <meta name="description" content="SushiMobile — SushiSwap Mobile DEX" />
     <title>SushiMobile</title>
+    <link rel="preconnect" href="https://auth.privy.io" />
+    <link rel="preconnect" href="https://rpc.privy.io" />
+    <link rel="preconnect" href="https://privy.metamask.io" />
+    <link rel="dns-prefetch" href="https://auth.privy.io" />
   </head>
-  <body class="bg-primary bg-radial-glow">
-    <div id="root"></div>
+  <body class="bg-[#0a0a0f]">
+    <div id="root">
+      <div style="display:flex;align-items:center;justify-content:center;height:100vh;background:#0a0a0f;">
+        <div style="text-align:center;">
+          <div style="width:40px;height:40px;border:3px solid rgba(255,0,122,0.2);border-top-color:#FF007A;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 12px;"></div>
+          <p style="color:#666;font-size:13px;font-family:system-ui;">Loading…</p>
+        </div>
+      </div>
+    </div>
+    <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
