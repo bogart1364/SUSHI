@@ -1,3 +1,5 @@
+import { mainnet, base } from 'viem/chains';
+
 export const privyConfig = {
   loginMethods: ['wallet', 'email', 'sms'],
   embeddedWallets: {
@@ -11,4 +13,5 @@ export const privyConfig = {
     accentColor: '#FF007A',
     logo: 'https://cryptologos.cc/logos/sushiswap-sushi-logo.png',
   },
+  supportedChains: [mainnet, base],
 };
