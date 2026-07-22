@@ -5,6 +5,7 @@ import SwapCard from './components/SwapCard';
 import TokenSelectorSheet from './components/TokenSelectorSheet';
 import WalletSheet from './components/WalletSheet';
 import Header from './components/Header';
+import BottomNav from './components/BottomNav';
 import Toast from './components/Toast';
 import { useUIStore } from './state/uiStore';
 
@@ -47,6 +48,7 @@ function App() {
       <TokenSelectorSheet open={sheetOpen} onSelect={handleSelectToken} onClose={() => setSheetOpen(false)} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
 
+      <BottomNav />
       <Toast />
     </div>
   );
