@@ -35,7 +35,7 @@ function App() {
     <div className="bg-primary min-h-screen font-apple flex flex-col items-center bg-radial-glow">
       <Header onOpenWallet={() => setWalletOpen(true)} />
 
-      <main className="flex-1 w-full flex flex-col justify-center px-3 gap-7 max-w-md mx-auto pb-6 pt-4">
+      <main className="flex-1 w-full flex flex-col justify-start px-3 gap-7 max-w-md mx-auto pt-4 pb-28">
         {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={handleOpenSheet} />}
         {active === 'Portfolio' && <Portfolio />}
         {active === 'Earn' && <Earn />}
