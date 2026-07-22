@@ -14,9 +14,14 @@ import Portfolio from './components/Portfolio';
 import Earn from './components/Earn';
 import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
+import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 
 function App() {
   const swap = useSwapState();
+  const { connectWallet } = usePrivy();
+  const { isConnected } = useAccount();
+
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');
   const [walletOpen, setWalletOpen] = useState(false);
@@ -30,9 +35,17 @@ function App() {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [active]);
 
+  const handleOpenWallet = () => {
+    if (isConnected) {
+      setWalletOpen(true);
+    } else {
+      connectWallet();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0f] font-apple flex flex-col">
-      <Header onOpenWallet={() => setWalletOpen(true)} />
+      <Header onOpenWallet={handleOpenWallet} />
 
       <main className="flex-1 flex flex-col items-center pt-3 pb-20 overflow-y-auto">
         {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={(t) => { setSheetType(t); setSheetOpen(true); }} />}

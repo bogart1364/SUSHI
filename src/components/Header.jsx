@@ -1,7 +1,9 @@
 import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function Header({ onOpenWallet }) {
   const { address, isConnected } = useAccount();
+  const { ready } = usePrivy();
   const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '';
 
   return (
@@ -22,7 +24,7 @@ export default function Header({ onOpenWallet }) {
             isConnected ? 'bg-white/5 border border-white/10 text-neon' : 'bg-neon text-white'
           }`}
         >
-          {isConnected ? shortAddr : 'Connect'}
+          {isConnected ? shortAddr : (ready ? 'Connect' : 'Loading…')}
         </button>
       </div>
     </header>

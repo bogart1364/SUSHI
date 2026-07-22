@@ -34,9 +34,7 @@ class ErrorBoundary extends React.Component {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0a0f', color: '#fff', padding: 20, textAlign: 'center' }}>
           <p style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 8 }}>Something went wrong</p>
           <p style={{ fontSize: 14, color: '#666', marginBottom: 16 }}>{this.state.error?.message}</p>
-          <button onClick={() => window.location.reload()} style={{ padding: '8px 24px', background: '#FF007A', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>
-            Reload
-          </button>
+          <button onClick={() => window.location.reload()} style={{ padding: '8px 24px', background: '#FF007A', color: '#fff', border: 'none', borderRadius: 12, fontWeight: 'bold', cursor: 'pointer' }}>Reload</button>
         </div>
       );
     }

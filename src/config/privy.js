@@ -12,6 +12,15 @@ export const privyConfig = {
     theme: 'dark',
     accentColor: '#FF007A',
     logo: 'https://cryptologos.cc/logos/sushiswap-sushi-logo.png',
+    walletList: [
+      'metamask',
+      'walletconnect',
+      'coinbase_wallet',
+      'rainbow',
+      'trust',
+      'argent',
+      'phantom',
+    ],
   },
   supportedChains: [mainnet, base],
 };
