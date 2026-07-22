@@ -1,7 +1,9 @@
 import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function Header({ onOpenWallet }) {
   const { address, isConnected } = useAccount();
+  const { authenticated } = usePrivy();
 
   const shortAddr = address
     ? `${address.slice(0, 6)}…${address.slice(-4)}`
