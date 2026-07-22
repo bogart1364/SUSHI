@@ -28,19 +28,24 @@ function App() {
   useEffect(() => { window.scrollTo({ top: 0, behavior: 'instant' }); }, [active]);
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f] font-apple flex flex-col">
+    <div className="h-full flex flex-col bg-[#0a0a0f] font-apple">
       <Header onOpenWallet={() => setWalletOpen(true)} />
-      <main className="flex-1 flex flex-col items-center pt-3 pb-20 overflow-y-auto">
-        {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={(t) => { setSheetType(t); setSheetOpen(true); }} />}
-        {active === 'Portfolio' && <Portfolio onOpenSend={() => setSendOpen(true)} onOpenReceive={() => setReceiveOpen(true)} onOpenBuy={() => setBuyOpen(true)} />}
-        {active === 'Earn' && <Earn />}
-        {active === 'Settings' && <Settings slippage={swap.slippage} setSlippage={swap.setSlippage} deadline={swap.deadline} setDeadline={swap.setDeadline} />}
-      </main>
+
+      <div className="flex-1 overflow-y-auto scroll-area" style={{ paddingBottom: 72 }}>
+        <div className="flex flex-col items-center w-full max-w-lg mx-auto px-3 pt-3">
+          {active === 'Swap' && <SwapCard {...swap} onOpenTokenSheet={(t) => { setSheetType(t); setSheetOpen(true); }} />}
+          {active === 'Portfolio' && <Portfolio onOpenSend={() => setSendOpen(true)} onOpenReceive={() => setReceiveOpen(true)} onOpenBuy={() => setBuyOpen(true)} />}
+          {active === 'Earn' && <Earn />}
+          {active === 'Settings' && <Settings slippage={swap.slippage} setSlippage={swap.setSlippage} deadline={swap.deadline} setDeadline={swap.setDeadline} />}
+        </div>
+      </div>
+
       <TokenSelectorSheet open={sheetOpen} onSelect={(t) => { if (sheetType === 'from') swap.setFromToken(t); else swap.setToToken(t); }} onClose={() => setSheetOpen(false)} excludeSymbol={sheetType === 'from' ? swap.toToken.symbol : swap.fromToken.symbol} />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SendModal open={sendOpen} onClose={() => setSendOpen(false)} />
       <ReceiveModal open={receiveOpen} onClose={() => setReceiveOpen(false)} />
       <BuyModal open={buyOpen} onClose={() => setBuyOpen(false)} />
+
       <BottomNav />
       <Toast />
     </div>

@@ -34,7 +34,7 @@ export default function BottomNav() {
   const setActive = useUIStore((s) => s.setActiveTab);
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 px-3 pb-3">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 px-2 pb-2" style={{ maxWidth: '100%' }}>
       <div className="mx-auto flex justify-around items-center py-2 bg-[#12121a]/95 backdrop-blur-xl rounded-xl border border-white/5" style={{ maxWidth: 480 }}>
         {Object.keys(icons).map((key) => (
           <button

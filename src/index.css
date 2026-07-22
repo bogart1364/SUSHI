@@ -2,7 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-html, body, #root { height: 100%; margin: 0; padding: 0; }
+html { height: 100%; }
+body { height: 100%; margin: 0; padding: 0; }
+#root { height: 100%; }
+
 :root { color-scheme: dark; }
 
 body {
@@ -16,20 +19,11 @@ body {
 
 input[type="number"]::-webkit-inner-spin-button,
 input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-
 ::placeholder { color: #555; }
 
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
+@keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spin { to { transform: rotate(360deg); } }
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(255,0,122,0.2); }
-  50% { box-shadow: 0 0 20px rgba(255,0,122,0.4); }
-}
+@keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(255,0,122,0.2); } 50% { box-shadow: 0 0 20px rgba(255,0,122,0.4); } }
 
 .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
 .animate-spin { animation: spin 1s linear infinite; }
@@ -42,3 +36,14 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 
 .neon-border { border: 1px solid rgba(255,0,122,0.2); }
 .neon-text { color: #FF007A; text-shadow: 0 0 8px rgba(255,0,122,0.3); }
+
+.scroll-area {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,0,122,0.2) transparent;
+}
+
+.scroll-area::-webkit-scrollbar { width: 4px; }
+.scroll-area::-webkit-scrollbar-track { background: transparent; }
+.scroll-area::-webkit-scrollbar-thumb { background: rgba(255,0,122,0.2); border-radius: 2px; }
