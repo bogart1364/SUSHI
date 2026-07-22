@@ -38,130 +38,124 @@ export default function SwapCard({
     setTxHash(null);
   };
 
-  return (
-    <GlassContainer className="w-full max-w-md mx-auto px-4 pt-5 pb-6 relative z-20" ariaLabel="Swap section">
-      {!isConnected ? (
-        <div className="text-center py-8">
-          <svg className="mx-auto mb-3" width="48" height="48" viewBox="0 0 48 48" fill="none">
+  if (!isConnected) {
+    return (
+      <GlassContainer className="w-full max-w-sm mx-auto px-4 py-6 relative z-20" ariaLabel="Swap section">
+        <div className="text-center py-4">
+          <svg className="mx-auto mb-2" width="40" height="40" viewBox="0 0 48 48" fill="none">
             <rect x="4" y="12" width="40" height="28" rx="4" stroke="#FF007A" strokeWidth="2" fill="none" />
             <circle cx="36" cy="26" r="4" stroke="#FF007A" strokeWidth="1.5" fill="none" />
             <path d="M12 20h12" stroke="#FF007A" strokeWidth="1.5" strokeLinecap="round" />
           </svg>
-          <p className="text-gray-400 text-sm">Connect your wallet to swap</p>
+          <p className="text-gray-400 text-sm">Connect wallet to swap</p>
         </div>
-      ) : (
-      <>
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-widest">Swap</span>
-        <span className="text-xs text-gray-600">Slippage: 0.5%</span>
+      </GlassContainer>
+    );
+  }
+
+  return (
+    <GlassContainer className="w-full max-w-sm mx-auto px-3 py-3 relative z-20" ariaLabel="Swap section">
+      <div className="flex items-center justify-between mb-3">
+        <span className="text-[11px] font-medium text-gray-500 uppercase tracking-widest">Swap</span>
+        <span className="text-[10px] text-gray-600">0.5%</span>
       </div>
 
-      <div className="glass-sushi rounded-2xl p-4 mb-2">
-        <div className="flex gap-3 items-center">
+      <div className="bg-white/5 rounded-xl p-3 mb-1.5">
+        <div className="flex gap-2 items-center">
           <button
             aria-label="Select from token"
             onClick={() => onOpenTokenSheet('from')}
-            className="flex items-center gap-2 bg-neon/10 px-3 py-2 rounded-xl cursor-pointer neon-border hover:shadow-neon transition-all duration-300 active:scale-95"
+            className="flex items-center gap-1.5 bg-neon/10 px-2.5 py-1.5 rounded-lg cursor-pointer neon-border active:scale-95"
           >
-            <img src={fromToken.logo} alt={fromToken.symbol} className="w-6 h-6 rounded-full" />
-            <span className="font-bold text-sm text-white">{fromToken.symbol}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <img src={fromToken.logo} alt={fromToken.symbol} className="w-5 h-5 rounded-full" />
+            <span className="font-bold text-xs text-white">{fromToken.symbol}</span>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
               <path d="M3 4.5l3 3 3-3" stroke="#FF007A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <input
-            className="bg-transparent text-right text-2xl outline-none w-full px-0 font-bold text-white placeholder-gray-700"
+            className="bg-transparent text-right text-xl outline-none w-full px-0 font-bold text-white placeholder-gray-700"
             value={amount}
             onChange={onAmountChange}
             placeholder="0.00"
             inputMode="decimal"
             type="text"
-            aria-label="Amount to swap"
           />
         </div>
-        <div className="flex items-center justify-between mt-3">
-          <span className="text-xs text-gray-500">Balance: <span className="text-gray-400">{fmt(balances[fromToken.symbol])}</span></span>
-          <button onClick={onMax} className="text-xs font-bold text-neon px-2 py-0.5 rounded-md hover:bg-neon/10 transition-colors">
+        <div className="flex items-center justify-between mt-2">
+          <span className="text-[10px] text-gray-500">Bal: {fmt(balances[fromToken.symbol])}</span>
+          <button onClick={onMax} className="text-[10px] font-bold text-neon px-1.5 py-0.5 rounded hover:bg-neon/10">
             MAX
           </button>
         </div>
       </div>
 
-      <div className="flex justify-center my-1">
+      <div className="flex justify-center -my-1.5 relative z-10">
         <button
           aria-label="Switch tokens"
           disabled={switching || loading}
           onClick={swapTokens}
-          className={`p-2.5 rounded-xl glass-sushi neon-border text-neon transition-all duration-300 hover:shadow-neon hover:scale-110 active:scale-95 ${
+          className={`p-1.5 rounded-lg bg-[#141420] neon-border text-neon transition-all hover:scale-110 active:scale-95 ${
             (switching || loading) && 'opacity-40 pointer-events-none'
           }`}
         >
-          <svg viewBox="0 0 20 20" width={18} height={18} aria-hidden="true">
-            <path d="M6 4l-3 3 3 3" stroke="#FF007A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M3 7h10a3 3 0 0 1 0 6h-1" stroke="#FF007A" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+          <svg viewBox="0 0 20 20" width={14} height={14}>
+            <path d="M6 4l-3 3 3 3" stroke="#FF007A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M3 7h10a3 3 0 0 1 0 6h-1" stroke="#FF007A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
           </svg>
         </button>
       </div>
 
-      <div className="glass-sushi rounded-2xl p-4 mt-2">
-        <div className="flex gap-3 items-center">
+      <div className="bg-white/5 rounded-xl p-3 mt-1.5">
+        <div className="flex gap-2 items-center">
           <button
             aria-label="Select to token"
             onClick={() => onOpenTokenSheet('to')}
-            className="flex items-center gap-2 bg-neon/10 px-3 py-2 rounded-xl cursor-pointer neon-border hover:shadow-neon transition-all duration-300 active:scale-95"
+            className="flex items-center gap-1.5 bg-neon/10 px-2.5 py-1.5 rounded-lg cursor-pointer neon-border active:scale-95"
           >
-            <img src={toToken.logo} alt={toToken.symbol} className="w-6 h-6 rounded-full" />
-            <span className="font-bold text-sm text-white">{toToken.symbol}</span>
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+            <img src={toToken.logo} alt={toToken.symbol} className="w-5 h-5 rounded-full" />
+            <span className="font-bold text-xs text-white">{toToken.symbol}</span>
+            <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
               <path d="M3 4.5l3 3 3-3" stroke="#FF007A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
           <input
-            className="bg-transparent text-right text-2xl outline-none w-full px-0 font-bold text-gray-400 select-none placeholder-gray-700"
+            className="bg-transparent text-right text-xl outline-none w-full px-0 font-bold text-gray-400 select-none placeholder-gray-700"
             disabled
-            value={
-              amount ? (Number(amount) * getConversion()).toFixed(4) : ''
-            }
+            value={amount ? (Number(amount) * getConversion()).toFixed(4) : ''}
             placeholder="0.00"
-            aria-label="Estimated receive amount"
           />
         </div>
       </div>
 
-      <div className="mt-3 px-1 space-y-1.5">
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>Rate</span>
-          <span className="text-gray-400">1 {fromToken.symbol} ≈ {getConversion().toFixed(4)} {toToken.symbol}</span>
-        </div>
-        <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>Network Fee</span>
-          <span className="text-gray-400">~ ${networkFeeUSD.toFixed(2)}</span>
-        </div>
+      <div className="mt-2.5 flex items-center justify-between text-[10px] text-gray-500 px-0.5">
+        <span>1 {fromToken.symbol} ≈ {getConversion().toFixed(4)} {toToken.symbol}</span>
+        <span>Fee: ~${networkFeeUSD.toFixed(2)}</span>
       </div>
 
       {error && (
-        <div className="mt-3 text-xs text-center text-error px-3 py-2 rounded-xl bg-error/10 border border-error/20">
+        <div className="mt-2 text-[11px] text-center text-error px-2 py-1.5 rounded-lg bg-error/10 border border-error/20">
           {error}
         </div>
       )}
 
       {txHash && (
-        <div className="mt-3 text-xs text-center text-success px-3 py-2 rounded-xl bg-success/10 border border-success/20">
-          Swap Success! <span className="font-mono text-[10px]">{txHash.slice(0, 10)}…</span>
+        <div className="mt-2 text-[11px] text-center text-success px-2 py-1.5 rounded-lg bg-success/10 border border-success/20">
+          Success! <span className="font-mono text-[9px]">{txHash.slice(0, 10)}…</span>
         </div>
       )}
 
       <button
-        className={`mt-4 w-full py-3.5 rounded-2xl text-base font-bold transition-all duration-300 ${
+        className={`mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition-all ${
           !canSwap || loading
             ? 'bg-gray-800 text-gray-600 cursor-not-allowed'
-            : 'bg-neon text-white shadow-neon hover:shadow-neon-lg hover:bg-pink-600 active:scale-[0.98]'
+            : 'bg-neon text-white shadow-neon hover:bg-pink-600 active:scale-[0.98]'
         }`}
         disabled={!canSwap || loading}
         onClick={async () => {
           await executeSwap();
           if (!error) {
-            pushToast({ type: 'success', message: 'Swap submitted to network.', ttl: 2500 });
+            pushToast({ type: 'success', message: 'Swap submitted.', ttl: 2500 });
           }
         }}
       >
@@ -171,13 +165,11 @@ export default function SwapCard({
             <span>Swapping…</span>
           </div>
         ) : !canSwap ? (
-          'Enter an amount'
+          'Enter amount'
         ) : (
           'Swap'
         )}
       </button>
-      </>
-      )}
     </GlassContainer>
   );
 }
