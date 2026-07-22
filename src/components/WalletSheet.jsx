@@ -18,22 +18,18 @@ function copyToClipboard(text) {
 }
 
 export default function WalletSheet({ open, onClose }) {
-  const { ready, authenticated, user, login, logout } = usePrivy();
+  const { ready, logout } = usePrivy();
   const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
   const [copied, setCopied] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setCopied(false);
+      setDisconnecting(false);
     }
   }, [open]);
-
-  useEffect(() => {
-    if (open && ready && !isConnected) {
-      login();
-    }
-  }, [open, ready]);
 
   if (!open) return null;
 
@@ -52,11 +48,16 @@ export default function WalletSheet({ open, onClose }) {
   };
 
   const handleDisconnect = async () => {
+    setDisconnecting(true);
     try {
+      if (isConnected) {
+        disconnect();
+      }
       await logout();
-      if (isConnected) disconnect();
-      onClose();
-    } catch {
+    } catch (e) {
+      console.error('Disconnect error:', e);
+    } finally {
+      setDisconnecting(false);
       onClose();
     }
   };
@@ -81,8 +82,12 @@ export default function WalletSheet({ open, onClose }) {
               <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-[0.98] transition" onClick={handleCopy}>
                 {copied ? '✓ Copied!' : 'Copy Address'}
               </button>
-              <button className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98] transition" onClick={handleDisconnect}>
-                Disconnect
+              <button
+                disabled={disconnecting}
+                className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98] transition disabled:opacity-50"
+                onClick={handleDisconnect}
+              >
+                {disconnecting ? 'Disconnecting…' : 'Disconnect'}
               </button>
             </div>
           </div>

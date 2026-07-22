@@ -15,10 +15,12 @@ import Earn from './components/Earn';
 import Settings from './components/Settings';
 import { useUIStore } from './state/uiStore';
 import { usePrivy } from '@privy-io/react-auth';
+import { useAccount } from 'wagmi';
 
 function App() {
   const swap = useSwapState();
   const { login } = usePrivy();
+  const { isConnected } = useAccount();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sheetType, setSheetType] = useState('from');
@@ -34,7 +36,11 @@ function App() {
   }, [active]);
 
   const handleOpenWallet = () => {
-    login();
+    if (isConnected) {
+      setWalletOpen(true);
+    } else {
+      login();
+    }
   };
 
   const handleOpenSheet = (type) => {
