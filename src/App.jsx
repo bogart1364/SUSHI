@@ -55,10 +55,22 @@ function App() {
           />
         )}
         {active === 'Earn' && <Earn />}
-        {active === 'Settings' && <Settings />}
+        {active === 'Settings' && (
+          <Settings
+            slippage={swap.slippage}
+            setSlippage={swap.setSlippage}
+            deadline={swap.deadline}
+            setDeadline={swap.setDeadline}
+          />
+        )}
       </main>
 
-      <TokenSelectorSheet open={sheetOpen} onSelect={handleSelectToken} onClose={() => setSheetOpen(false)} />
+      <TokenSelectorSheet
+        open={sheetOpen}
+        onSelect={handleSelectToken}
+        onClose={() => setSheetOpen(false)}
+        excludeSymbol={sheetType === 'from' ? swap.toToken.symbol : swap.fromToken.symbol}
+      />
       <WalletSheet open={walletOpen} onClose={() => setWalletOpen(false)} />
       <SendModal open={sendOpen} onClose={() => setSendOpen(false)} />
       <ReceiveModal open={receiveOpen} onClose={() => setReceiveOpen(false)} />

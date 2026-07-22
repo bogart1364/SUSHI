@@ -1,26 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useConnect, useAccount, useDisconnect } from 'wagmi';
 
 const WALLET_DATA = {
-  'injected': {
-    name: 'MetaMask',
-    desc: 'Connect with MetaMask',
-    img: 'https://docs.metamask.io/img/metamask-fox.svg',
-    bg: '#F6851B',
-  },
-  'walletConnect': {
-    name: 'WalletConnect',
-    desc: 'Scan QR with any wallet',
-    img: 'https://raw.githubusercontent.com/nickmetsch/walletconnect-logo/main/walletconnect-circle-blue.svg',
-    bg: '#3B99FC',
-  },
-  'coinbaseWalletSDK': {
-    name: 'Coinbase Wallet',
-    desc: 'Connect with Coinbase',
-    img: 'https://altcoinsbox.com/wp-content/uploads/2023/01/coinbase-logo.png',
-    bg: '#0052FF',
-  },
+  'injected': { name: 'MetaMask', desc: 'Browser extension', bg: '#F6851B', img: 'https://docs.metamask.io/img/metamask-fox.svg' },
+  'walletConnect': { name: 'WalletConnect', desc: 'Scan QR with any wallet', bg: '#3B99FC', img: 'https://raw.githubusercontent.com/nickmetsch/walletconnect-logo/main/walletconnect-circle-blue.svg' },
+  'coinbaseWalletSDK': { name: 'Coinbase Wallet', desc: 'Coinbase app', bg: '#0052FF', img: 'https://altcoinsbox.com/wp-content/uploads/2023/01/coinbase-logo.png' },
 };
+
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.opacity = '0';
+  document.body.appendChild(ta);
+  ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  return Promise.resolve();
+}
 
 export default function WalletSheet({ open, onClose }) {
   const { connectors, connect, isPending } = useConnect();
@@ -28,10 +28,25 @@ export default function WalletSheet({ open, onClose }) {
   const { disconnect } = useDisconnect();
   const [connectingId, setConnectingId] = useState(null);
   const [connectError, setConnectError] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setConnectError('');
+      setCopied(false);
+    }
+  }, [open]);
 
   if (!open) return null;
 
   const shortAddr = address ? `${address.slice(0, 6)}…${address.slice(-4)}` : '';
+
+  const seen = new Set();
+  const uniqueConnectors = connectors.filter((c) => {
+    if (seen.has(c.id)) return false;
+    seen.add(c.id);
+    return true;
+  });
 
   const handleConnect = async (connector) => {
     setConnectingId(connector.id);
@@ -40,9 +55,19 @@ export default function WalletSheet({ open, onClose }) {
       await connect({ connector });
       onClose();
     } catch (e) {
-      setConnectError(e.message || 'Connection failed');
+      setConnectError(e.shortMessage || e.message || 'Connection failed. Make sure your wallet is installed.');
     } finally {
       setConnectingId(null);
+    }
+  };
+
+  const handleCopy = async () => {
+    try {
+      await copyToClipboard(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      setCopied(false);
     }
   };
 
@@ -59,14 +84,14 @@ export default function WalletSheet({ open, onClose }) {
               </div>
               <div>
                 <p className="text-white font-bold text-sm">Connected</p>
-                <p className="text-gray-500 text-xs">{shortAddr}</p>
+                <p className="text-gray-500 text-xs font-mono">{shortAddr}</p>
               </div>
             </div>
             <div className="space-y-2">
-              <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-[0.98]" onClick={() => { navigator.clipboard.writeText(address); onClose(); }}>
-                Copy Address
+              <button className="w-full py-3 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-[0.98] transition" onClick={handleCopy}>
+                {copied ? '✓ Copied!' : 'Copy Address'}
               </button>
-              <button className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98]" onClick={() => { disconnect(); onClose(); }}>
+              <button className="w-full py-3 rounded-xl bg-error/10 border border-error/20 text-error font-semibold text-sm active:scale-[0.98] transition" onClick={() => { disconnect(); onClose(); }}>
                 Disconnect
               </button>
             </div>
@@ -84,10 +109,9 @@ export default function WalletSheet({ open, onClose }) {
         <div className="p-5">
           <h2 className="text-lg font-bold text-white text-center mb-4">Connect Wallet</h2>
           <div className="space-y-2">
-            {connectors.map((connector) => {
+            {uniqueConnectors.map((connector) => {
               const data = WALLET_DATA[connector.id] || { name: connector.name || 'Wallet', desc: 'Connect', bg: '#333', img: null };
               const isLoading = connectingId === connector.id;
-
               return (
                 <button
                   key={connector.id}
@@ -95,16 +119,17 @@ export default function WalletSheet({ open, onClose }) {
                   className="flex w-full items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition active:scale-[0.98] disabled:opacity-50"
                   onClick={() => handleConnect(connector)}
                 >
-                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ background: data.bg || '#333' }}>
-                    <img
-                      src={data.img}
-                      alt={data.name}
-                      className="w-7 h-7 object-contain"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                        e.target.parentNode.innerHTML = `<span style="color:white;font-weight:bold;font-size:18px">${data.name[0]}</span>`;
-                      }}
-                    />
+                  <div className="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center overflow-hidden" style={{ background: data.bg }}>
+                    {data.img ? (
+                      <img
+                        src={data.img}
+                        alt={data.name}
+                        className="w-6 h-6 object-contain"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    ) : (
+                      <span className="text-white font-bold text-lg">{data.name[0]}</span>
+                    )}
                   </div>
                   <div className="text-left flex-1">
                     <p className="text-white font-semibold text-sm">{data.name}</p>
@@ -116,7 +141,7 @@ export default function WalletSheet({ open, onClose }) {
             })}
           </div>
           {connectError && (
-            <div className="mt-3 p-2 rounded-lg bg-error/10 border border-error/20">
+            <div className="mt-3 p-2.5 rounded-lg bg-error/10 border border-error/20">
               <p className="text-error text-xs text-center">{connectError}</p>
             </div>
           )}

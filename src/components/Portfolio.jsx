@@ -1,4 +1,4 @@
-import { useAccount, useBalance, useBlockNumber } from 'wagmi';
+import { useAccount, useBalance } from 'wagmi';
 import { useState, useEffect } from 'react';
 
 const TOKENS = [
@@ -28,7 +28,6 @@ function TokenBalance({ token, address }) {
         <p className="text-white font-semibold text-sm">
           {isLoading ? <span className="inline-block w-12 h-4 bg-white/10 rounded animate-pulse" /> : balance}
         </p>
-        <p className="text-gray-600 text-xs">{token.symbol}</p>
       </div>
     </div>
   );
@@ -37,11 +36,15 @@ function TokenBalance({ token, address }) {
 function TxHistory({ address }) {
   const [txs, setTxs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!address) return;
     setLoading(true);
-    fetch(`https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=YourApiKeyToken`)
+    setError('');
+    const apiKey = import.meta.env.VITE_ETHERSCAN_API_KEY || '';
+    const url = `https://api.etherscan.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc${apiKey ? `&apikey=${apiKey}` : ''}`;
+    fetch(url)
       .then((r) => r.json())
       .then((d) => {
         if (d.status === '1' && d.result) {
@@ -54,10 +57,15 @@ function TxHistory({ address }) {
             isError: tx.isError === '1',
             type: tx.from.toLowerCase() === address.toLowerCase() ? 'out' : 'in',
           })));
+        } else {
+          setError('Could not load transactions');
         }
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setError('Network error');
+        setLoading(false);
+      });
   }, [address]);
 
   if (loading) {
@@ -68,6 +76,10 @@ function TxHistory({ address }) {
         ))}
       </div>
     );
+  }
+
+  if (error) {
+    return <p className="text-error text-xs text-center py-4">{error}</p>;
   }
 
   if (txs.length === 0) {
@@ -137,15 +149,9 @@ export default function Portfolio({ onOpenSend, onOpenReceive, onOpenBuy }) {
       </div>
 
       <div className="flex gap-2 mb-5">
-        <button onClick={onOpenBuy} className="flex-1 py-2.5 rounded-xl bg-neon text-white font-semibold text-sm active:scale-95 transition">
-          Buy
-        </button>
-        <button onClick={onOpenSend} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-95 transition">
-          Send
-        </button>
-        <button onClick={onOpenReceive} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-95 transition">
-          Receive
-        </button>
+        <button onClick={onOpenBuy} className="flex-1 py-2.5 rounded-xl bg-neon text-white font-semibold text-sm active:scale-95 transition">Buy</button>
+        <button onClick={onOpenSend} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-95 transition">Send</button>
+        <button onClick={onOpenReceive} className="flex-1 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white font-semibold text-sm active:scale-95 transition">Receive</button>
       </div>
 
       <p className="text-gray-500 text-xs uppercase tracking-wider mb-3">Tokens</p>

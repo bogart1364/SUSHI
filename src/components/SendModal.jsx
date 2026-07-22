@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAccount, useBalance, useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther } from 'viem';
+import { parseEther, isAddress } from 'viem';
+import { sanitizeNumeric } from '../utils/format';
 
 export default function SendModal({ open, onClose }) {
   const { address } = useAccount();
@@ -9,26 +10,30 @@ export default function SendModal({ open, onClose }) {
   const [amount, setAmount] = useState('');
   const [error, setError] = useState('');
 
-  const { data: txHash, sendTransaction, isPending } = useSendTransaction();
+  const { data: txHash, sendTransaction, isPending, error: txError } = useSendTransaction();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash: txHash });
 
   if (!open) return null;
 
   const handleSend = () => {
     setError('');
-    if (!to || !to.startsWith('0x') || to.length !== 42) {
-      setError('Invalid address');
+    if (!to || !isAddress(to)) {
+      setError('Invalid Ethereum address');
       return;
     }
     if (!amount || Number(amount) <= 0) {
-      setError('Invalid amount');
+      setError('Enter a valid amount');
       return;
     }
     if (Number(amount) > Number(ethBalance?.formatted || 0)) {
       setError('Insufficient balance');
       return;
     }
-    sendTransaction({ to, value: parseEther(amount) });
+    try {
+      sendTransaction({ to, value: parseEther(amount) });
+    } catch {
+      setError('Transaction failed to send');
+    }
   };
 
   const handleClose = () => {
@@ -37,6 +42,8 @@ export default function SendModal({ open, onClose }) {
     setError('');
     onClose();
   };
+
+  const displayError = txError?.shortMessage || txError?.message || error;
 
   if (isSuccess) {
     return (
@@ -50,7 +57,7 @@ export default function SendModal({ open, onClose }) {
               </svg>
             </div>
             <p className="text-white font-bold text-lg mb-1">Sent!</p>
-            <p className="text-gray-500 text-sm mb-3">{amount} ETH sent</p>
+            <p className="text-gray-500 text-sm mb-3">{amount} ETH</p>
             <a href={`https://etherscan.io/tx/${txHash}`} target="_blank" rel="noopener noreferrer" className="text-neon text-xs">
               View on Etherscan →
             </a>
@@ -79,6 +86,7 @@ export default function SendModal({ open, onClose }) {
               placeholder="0x..."
               className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-neon/50 transition font-mono"
             />
+            {to && !isAddress(to) && <p className="text-error text-[10px] mt-1">Invalid address</p>}
           </div>
 
           <div>
@@ -86,14 +94,14 @@ export default function SendModal({ open, onClose }) {
             <div className="relative">
               <input
                 value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                onChange={(e) => setAmount(sanitizeNumeric(e.target.value))}
                 placeholder="0.0"
                 type="text"
                 inputMode="decimal"
                 className="w-full px-3 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm outline-none focus:border-neon/50 transition"
               />
               <button
-                onClick={() => setAmount(ethBalance?.formatted || '0')}
+                onClick={() => setAmount(String(Math.max(0, Number(ethBalance?.formatted || 0) - 0.001)))}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-neon text-xs font-bold px-2 py-1 rounded bg-neon/10"
               >
                 MAX
@@ -103,9 +111,9 @@ export default function SendModal({ open, onClose }) {
           </div>
         </div>
 
-        {error && (
+        {displayError && (
           <div className="mt-3 p-2 rounded-lg bg-error/10 border border-error/20">
-            <p className="text-error text-xs text-center">{error}</p>
+            <p className="text-error text-xs text-center">{displayError}</p>
           </div>
         )}
 

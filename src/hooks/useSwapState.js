@@ -1,20 +1,9 @@
-import { useCallback, useMemo, useState, useEffect } from 'react';
-import { useAccount, useBalance } from 'wagmi';
+import { useCallback, useMemo, useState } from 'react';
+import { useAccount, useBalance, useReadContract } from 'wagmi';
+import { erc20Abi } from 'viem';
 import { TOKENS } from '../utils/tokens';
 
 const GAS_USD = 0.35;
-
-function useTokenBalance(symbol, address) {
-  const isETH = symbol === 'ETH';
-  const token = TOKENS.find((t) => t.symbol === symbol);
-  const { data } = useBalance({
-    address,
-    token: isETH ? undefined : token?.address,
-    watch: true,
-    enabled: !!address,
-  });
-  return data ? Number(data.formatted) : 0;
-}
 
 export function useSwapState() {
   const { address, isConnected } = useAccount();
@@ -25,27 +14,71 @@ export function useSwapState() {
   const [loading, setLoading] = useState(false);
   const [txHash, setTxHash] = useState(null);
   const [error, setError] = useState('');
+  const [slippage, setSlippage] = useState(0.5);
+  const [deadline, setDeadline] = useState(30);
 
-  const ethBalance = useTokenBalance('ETH', address);
-  const sushiBalance = useTokenBalance('SUSHI', address);
-  const usdtBalance = useTokenBalance('USDT', address);
+  const { data: ethBalance } = useBalance({
+    address,
+    watch: true,
+    enabled: !!address,
+  });
+
+  const { data: sushiBalance } = useBalance({
+    address,
+    token: TOKENS[1].address,
+    watch: true,
+    enabled: !!address,
+  });
+
+  const { data: usdtBalance } = useBalance({
+    address,
+    token: TOKENS[2].address,
+    watch: true,
+    enabled: !!address,
+  });
+
+  const { data: usdcBalance } = useBalance({
+    address,
+    token: TOKENS[3].address,
+    watch: true,
+    enabled: !!address,
+  });
+
+  const { data: wbtcBalance } = useBalance({
+    address,
+    token: TOKENS[4].address,
+    watch: true,
+    enabled: !!address,
+  });
 
   const balances = useMemo(() => ({
-    ETH: ethBalance,
-    SUSHI: sushiBalance,
-    USDT: usdtBalance,
-  }), [ethBalance, sushiBalance, usdtBalance]);
+    ETH: ethBalance ? Number(ethBalance.formatted) : 0,
+    SUSHI: sushiBalance ? Number(sushiBalance.formatted) : 0,
+    USDT: usdtBalance ? Number(usdtBalance.formatted) : 0,
+    USDC: usdcBalance ? Number(usdcBalance.formatted) : 0,
+    WBTC: wbtcBalance ? Number(wbtcBalance.formatted) : 0,
+  }), [ethBalance, sushiBalance, usdtBalance, usdcBalance, wbtcBalance]);
 
   const getConversion = useCallback(() => {
     if (fromToken.symbol === 'ETH' && toToken.symbol === 'SUSHI') return 12.3;
     if (fromToken.symbol === 'SUSHI' && toToken.symbol === 'ETH') return 1 / 12.3;
     if (fromToken.symbol === 'ETH' && toToken.symbol === 'USDT') return 3200;
     if (fromToken.symbol === 'USDT' && toToken.symbol === 'ETH') return 1 / 3200;
+    if (fromToken.symbol === 'ETH' && toToken.symbol === 'USDC') return 3200;
+    if (fromToken.symbol === 'USDC' && toToken.symbol === 'ETH') return 1 / 3200;
+    if (fromToken.symbol === 'ETH' && toToken.symbol === 'WBTC') return 0.000031;
+    if (fromToken.symbol === 'WBTC' && toToken.symbol === 'ETH') return 32000;
     return 1;
   }, [fromToken.symbol, toToken.symbol]);
 
   const minAmount = 0.00001;
-  const maxAmount = useMemo(() => balances[fromToken.symbol] ?? 0, [balances, fromToken.symbol]);
+  const maxAmount = useMemo(() => {
+    const bal = balances[fromToken.symbol] ?? 0;
+    if (fromToken.symbol === 'ETH') {
+      return Math.max(0, bal - 0.001);
+    }
+    return bal;
+  }, [balances, fromToken.symbol]);
 
   const canSwap = useMemo(() => {
     if (!isConnected) return false;
@@ -76,23 +109,25 @@ export function useSwapState() {
     setError('');
     if (!canSwap) {
       setError('Invalid amount or same token pair.');
-      return;
+      return false;
     }
     const a = Number(amount);
     if (a > (balances[fromToken.symbol] ?? 0)) {
       setError('Insufficient balance.');
-      return;
+      return false;
     }
     setLoading(true);
     try {
       await new Promise((res) => setTimeout(res, 350 + Math.random() * 1200));
-      const out = a * getConversion();
-      setTxHash('0x' + crypto.getRandomValues(new Uint32Array(4)).join(''));
+      const fakeHash = '0x' + Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2, '0')).join('');
+      setTxHash(fakeHash);
       setAmount('');
+      setLoading(false);
+      return true;
     } catch (e) {
       setError('Swap failed. Please try again.');
-    } finally {
       setLoading(false);
+      return false;
     }
   };
 
@@ -115,5 +150,9 @@ export function useSwapState() {
     canSwap,
     networkFeeUSD,
     isConnected,
+    slippage,
+    setSlippage,
+    deadline,
+    setDeadline,
   };
 }
