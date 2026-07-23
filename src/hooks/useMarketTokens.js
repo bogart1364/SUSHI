@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { fetchRobinhoodTokens } from '../services/dexScreener';
 
 // ─── Sorting comparators ──────────────────────────────────────────────────────
@@ -6,11 +6,12 @@ import { fetchRobinhoodTokens } from '../services/dexScreener';
 const comparators = {
   marketCap: (a, b) => (b.marketCap || 0) - (a.marketCap || 0),
   price: (a, b) => (b.price || 0) - (a.price || 0),
-  change: (a, b) => Math.abs(b.change24h || 0) - Math.abs(a.change24h || 0),
+  change: (a, b) => (b.change24h || 0) - (a.change24h || 0),
   volume: (a, b) => (b.volume24h || 0) - (a.volume24h || 0),
   liquidity: (a, b) => (b.liquidity || 0) - (a.liquidity || 0),
   name: (a, b) => a.name.localeCompare(b.name),
   age: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
+  buys: (a, b) => (b.buys24h || 0) - (a.buys24h || 0),
 };
 
 // ─── Category filter functions ────────────────────────────────────────────────
@@ -30,37 +31,61 @@ function filterByCategory(tokens, category) {
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────
 
-const POLL_INTERVAL = 30_000; // 30 seconds
+const POLL_INTERVAL = 30_000;
 
 export function useMarketTokens() {
   const [tokens, setTokens] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const intervalRef = useRef(null);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isRefresh = false) => {
     try {
+      if (isRefresh) setRefreshing(true);
       const data = await fetchRobinhoodTokens();
       setTokens(data);
       setError(null);
+      setLastUpdated(Date.now());
     } catch (err) {
       setError(err.message || 'Failed to load tokens');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, []);
 
   useEffect(() => {
     load();
-    const id = setInterval(load, POLL_INTERVAL);
-    return () => clearInterval(id);
+    intervalRef.current = setInterval(() => load(false), POLL_INTERVAL);
+    return () => clearInterval(intervalRef.current);
   }, [load]);
 
-  // Filter + sort helper
+  const refetch = useCallback(() => {
+    load(true);
+  }, [load]);
+
+  // Force refresh (clear cache + fetch)
+  const forceRefresh = useCallback(async () => {
+    try {
+      setRefreshing(true);
+      localStorage.removeItem('dexscreener_rh_sushi');
+      const data = await fetchRobinhoodTokens();
+      setTokens(data);
+      setError(null);
+      setLastUpdated(Date.now());
+    } catch (err) {
+      setError(err.message || 'Failed to refresh');
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
+
   const getFilteredTokens = useCallback(
     ({ query, category, sortBy }) => {
       let list = filterByCategory(tokens, category);
 
-      // Search filter
       const q = (query || '').trim().toLowerCase();
       if (q) {
         list = list.filter(
@@ -71,18 +96,28 @@ export function useMarketTokens() {
         );
       }
 
-      // Sort
       const cmp = comparators[sortBy] || comparators.marketCap;
       return [...list].sort(cmp);
     },
     [tokens]
   );
 
+  // Get price map for quick lookups
+  const priceMap = useMemo(() => {
+    const map = {};
+    tokens.forEach(t => { map[t.symbol] = t.price; });
+    return map;
+  }, [tokens]);
+
   return {
     tokens,
     loading,
     error,
+    lastUpdated,
+    refreshing,
     getFilteredTokens,
-    refetch: load,
+    refetch,
+    forceRefresh,
+    priceMap,
   };
 }

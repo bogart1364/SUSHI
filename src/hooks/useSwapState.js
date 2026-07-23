@@ -1,6 +1,7 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState, useEffect } from 'react';
 import { useAccount, useBalance, useChainId } from 'wagmi';
 import { TOKENS_BY_CHAIN } from '../utils/tokens';
+import { getTokenPrice } from '../services/dexScreener';
 
 export function useSwapState() {
   const { address, isConnected } = useAccount();
@@ -16,6 +17,34 @@ export function useSwapState() {
   const [error, setError] = useState('');
   const [slippage, setSlippage] = useState(0.5);
   const [deadline, setDeadline] = useState(30);
+  const [prices, setPrices] = useState({});
+
+  // Fetch real prices from DexScreener
+  useEffect(() => {
+    async function loadPrices() {
+      try {
+        const priceSymbols = ['ETH', 'WETH', 'SUSHI', 'USDC', 'USDT', 'WBTC', 'DAI'];
+        const entries = await Promise.allSettled(
+          priceSymbols.map(async (sym) => {
+            const price = await getTokenPrice(sym);
+            return [sym, price];
+          })
+        );
+        const newPrices = {};
+        entries.forEach(e => {
+          if (e.status === 'fulfilled' && e.value[1] > 0) {
+            newPrices[e.value[0]] = e.value[1];
+          }
+        });
+        if (Object.keys(newPrices).length > 0) {
+          setPrices(prev => ({ ...prev, ...newPrices }));
+        }
+      } catch { /* silent */ }
+    }
+    loadPrices();
+    const id = setInterval(loadPrices, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const { data: ethBalance } = useBalance({ address, watch: true, enabled: !!address });
   const { data: token2Balance } = useBalance({ address, token: tokens[1]?.address === '0x0000000000000000000000000000000000000000' ? undefined : tokens[1]?.address, watch: true, enabled: !!address });
@@ -32,20 +61,33 @@ export function useSwapState() {
   }), [ethBalance, token2Balance, token3Balance, token4Balance, token5Balance, tokens]);
 
   const getConversion = useCallback(() => {
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'USDC') return 3200;
-    if (fromToken.symbol === 'USDC' && toToken.symbol === 'ETH') return 1 / 3200;
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'DAI') return 3200;
-    if (fromToken.symbol === 'DAI' && toToken.symbol === 'ETH') return 1 / 3200;
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'WETH') return 1;
-    if (fromToken.symbol === 'WETH' && toToken.symbol === 'ETH') return 1;
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'SUSHI') return 12.3;
-    if (fromToken.symbol === 'SUSHI' && toToken.symbol === 'ETH') return 1 / 12.3;
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'USDT') return 3200;
-    if (fromToken.symbol === 'USDT' && toToken.symbol === 'ETH') return 1 / 3200;
-    if (fromToken.symbol === 'ETH' && toToken.symbol === 'WBTC') return 0.000031;
-    if (fromToken.symbol === 'WBTC' && toToken.symbol === 'ETH') return 32000;
-    return 1;
-  }, [fromToken.symbol, toToken.symbol]);
+    const from = fromToken.symbol;
+    const to = toToken.symbol;
+
+    if (from === to) return 1;
+
+    // Same underlying asset (ETH/WETH)
+    if ((from === 'ETH' && to === 'WETH') || (from === 'WETH' && to === 'ETH')) return 1;
+
+    // Get prices from DexScreener
+    const fromPrice = prices[from] || 0;
+    const toPrice = prices[to] || 0;
+
+    if (fromPrice > 0 && toPrice > 0) {
+      return fromPrice / toPrice;
+    }
+
+    // Fallback: hardcoded rates
+    const fallbackRates = {
+      'ETH->USDC': 3200, 'ETH->USDT': 3200, 'ETH->DAI': 3200,
+      'ETH->SUSHI': 12.3, 'ETH->WBTC': 0.000031,
+      'USDC->ETH': 1 / 3200, 'USDT->ETH': 1 / 3200, 'DAI->ETH': 1 / 3200,
+      'SUSHI->ETH': 1 / 12.3, 'WBTC->ETH': 32000,
+      'USDC->USDT': 1, 'USDC->DAI': 1, 'USDT->DAI': 1,
+    };
+
+    return fallbackRates[`${from}->${to}`] || 1;
+  }, [fromToken.symbol, toToken.symbol, prices]);
 
   const maxAmount = useMemo(() => {
     const bal = balances[fromToken.symbol] ?? 0;
@@ -91,5 +133,10 @@ export function useSwapState() {
     }
   };
 
-  return { fromToken, toToken, setFromToken, setToToken, amount, setAmount, balances, switching, swapTokens, loading, executeSwap, getConversion, txHash, setTxHash, error, canSwap, networkFeeUSD: 0.35, isConnected, slippage, setSlippage, deadline, setDeadline };
+  const networkFeeUSD = useMemo(() => {
+    const ethPrice = prices.ETH || 3200;
+    return 0.0001 * ethPrice;
+  }, [prices]);
+
+  return { fromToken, toToken, setFromToken, setToToken, amount, setAmount, balances, switching, swapTokens, loading, executeSwap, getConversion, txHash, setTxHash, error, canSwap, networkFeeUSD, isConnected, slippage, setSlippage, deadline, setDeadline, prices };
 }

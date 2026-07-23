@@ -22,12 +22,22 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 ::placeholder { color: #555; }
 
 @keyframes fade-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-up { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes pulse-glow { 0%, 100% { box-shadow: 0 0 8px rgba(255,0,122,0.2); } 50% { box-shadow: 0 0 20px rgba(255,0,122,0.4); } }
+@keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
 .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+.animate-slide-up { animation: slide-up 0.3s ease-out forwards; }
 .animate-spin { animation: spin 1s linear infinite; }
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.05) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+.animate-blink { animation: blink 1s ease-in-out infinite; }
 
 .glass-sushi {
   background: linear-gradient(135deg, rgba(255,0,122,0.04) 0%, rgba(18,18,24,0.8) 50%, rgba(255,0,122,0.02) 100%);
@@ -36,6 +46,9 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 
 .neon-border { border: 1px solid rgba(255,0,122,0.2); }
 .neon-text { color: #FF007A; text-shadow: 0 0 8px rgba(255,0,122,0.3); }
+
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
 .scroll-area {
   overflow-y: auto;
@@ -47,3 +60,7 @@ input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; marg
 .scroll-area::-webkit-scrollbar { width: 4px; }
 .scroll-area::-webkit-scrollbar-track { background: transparent; }
 .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,0,122,0.2); border-radius: 2px; }
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}

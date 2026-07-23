@@ -46,8 +46,13 @@ export default function BottomNav() {
           <button
             key={key}
             onClick={() => setActive(key)}
-            className={`flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg transition-all ${active === key ? 'text-neon' : 'text-gray-600'}`}
+            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-lg transition-all relative ${
+              active === key ? 'text-neon' : 'text-gray-600 hover:text-gray-400'
+            }`}
           >
+            {active === key && (
+              <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 w-4 h-0.5 rounded-full bg-neon shadow-neon" />
+            )}
             {icons[key]}
             <span className="text-[8px] font-medium">{key}</span>
           </button>

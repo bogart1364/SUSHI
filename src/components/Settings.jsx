@@ -26,8 +26,8 @@ export default function Settings({ slippage, setSlippage, deadline, setDeadline 
       <div className="glass-sushi rounded-2xl p-3.5">
         <p className="text-gray-500 text-[9px] uppercase tracking-wider mb-2">About</p>
         <div className="space-y-1.5 text-[11px]">
-          <div className="flex justify-between"><span className="text-gray-400">Version</span><span className="text-white">1.1.0</span></div>
-          <div className="flex justify-between"><span className="text-gray-400">Network</span><span className="text-success">Ethereum / Base</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Version</span><span className="text-white">2.0.0</span></div>
+          <div className="flex justify-between"><span className="text-gray-400">Networks</span><span className="text-success">ETH / Base / Robinhood</span></div>
           <div className="flex justify-between"><span className="text-gray-400">Slippage</span><span className="text-neon">{slippage}%</span></div>
         </div>
       </div>
